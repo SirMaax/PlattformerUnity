@@ -586,7 +586,7 @@ MonoBehaviour:
   downMovementForce: 30
   minimumJumpHeight: 0.4
   jumpHeightRecument: 1.5
-  dashForce: 3500
+  dashForce: 5000
   dashCooldown: 25
   currentJumpDuration: 0
 --- !u!61 &251582805

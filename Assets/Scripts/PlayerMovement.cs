@@ -20,7 +20,7 @@ public class PlayerMovement : MonoBehaviour
     public float currentJumpDuration = 0f;                 //Length of current Jump
 
     private float horizontalMovement = 0f;                  //Important for moving left and right take input
-    private float lastHorizontMovement = 1f;
+    private float lastHorizontMovement = 0f;
     private float vertialMovement = 1f;                     //Goes from 3 to -3 -> Only controls down movement right now
     private float dashMovement = 0f;                        //0 When right should button is not pressed. 1 When pressed;
     private bool downMovement = false;                       //True = Player is pressing down , False not
@@ -29,9 +29,8 @@ public class PlayerMovement : MonoBehaviour
     private bool airborn = false;                           //When jumping player is airborn
     private float minimumJump = 0f;                       //Counter for minimumJump
 
-    public float dashCounter = 0f;
-    private bool dashOnlyOnceInAir = true;                 //Allows the player to only dash once in air
-    private bool dashing = false;                           //True = Player is dashing
+    private float dashCounter = 0f;
+
 
     // Update is called once per frame
     void Update()
@@ -70,36 +69,20 @@ public class PlayerMovement : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        //Moves the player left and right
-        if(!dashing)
         controller.Move(horizontalMovement, false, false);
 
 
-        if (dashing)
-        {
-            dashCounter++;
-            if (dashCounter >= dashCooldown)
-            {
-                dashing = false;
-                dashCounter = 0;
-                rigidBody.velocity = new Vector2(0, 0);
-            }
-        }
-
         if (airborn) currentJumpDuration++;
        
-        
+        dashCounter++;
         //Dash
         if(dashMovement == 1 )
         {
             
-            if (!dashing)
+            if (dashCounter >= dashCooldown)
             {
-                if (airborn) dashOnlyOnceInAir = false;
-                dashing = true;
-            Debug.Log("Dashed");
+                dashCounter = 0;
                 rigidBody.AddForce(new Vector2(dashForce * lastHorizontMovement, 0));
-                
             }
         }
 
@@ -138,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
             grounded = true;
             airborn = false;
             downMovement = false;
-            dashOnlyOnceInAir = true;
+           
         }
     }
 
