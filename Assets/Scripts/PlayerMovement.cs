@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
     [SerializeField] float dashForce = 0f;
     [SerializeField] float dashCooldown = 0f;
-
+    [SerializeField] float dashMultiply = 0.1f;
     public float currentJumpDuration = 0f;                 //Length of current Jump
 
     private float horizontalMovement = 0f;                  //Important for moving left and right take input
@@ -29,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private bool airborn = false;                           //When jumping player is airborn
     private float minimumJump = 0f;                       //Counter for minimumJump
 
-    private float dashCounter = 0f;
+    private float dashCounter = 25f;
     private bool dashOnlyOnceInAir = true;                 //Allows the player to only dash once in air
 
     // Update is called once per frame
@@ -69,6 +69,8 @@ public class PlayerMovement : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        //Movement
+        
         controller.Move(horizontalMovement, false, false);
 
 
@@ -84,7 +86,7 @@ public class PlayerMovement : MonoBehaviour
                 if (airborn) dashOnlyOnceInAir = false;
 
                 dashCounter = 0;
-                rigidBody.AddForce(new Vector2(dashForce * lastHorizontMovement, 0));
+                rigidBody.AddForce(new Vector2(lastHorizontMovement * ( dashForce - ( System.Math.Abs(horizontalMovement) * dashMultiply )), 0));
             }
         }
 
