@@ -30,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
     private float minimumJump = 0f;                       //Counter for minimumJump
 
     private float dashCounter = 0f;
-
+    private bool dashOnlyOnceInAir = true;                 //Allows the player to only dash once in air
 
     // Update is called once per frame
     void Update()
@@ -79,8 +79,10 @@ public class PlayerMovement : MonoBehaviour
         if(dashMovement == 1 )
         {
             
-            if (dashCounter >= dashCooldown)
+            if (dashCounter >= dashCooldown && dashOnlyOnceInAir)
             {
+                if (airborn) dashOnlyOnceInAir = false;
+
                 dashCounter = 0;
                 rigidBody.AddForce(new Vector2(dashForce * lastHorizontMovement, 0));
             }
@@ -121,7 +123,7 @@ public class PlayerMovement : MonoBehaviour
             grounded = true;
             airborn = false;
             downMovement = false;
-           
+            dashOnlyOnceInAir = true;
         }
     }
 
