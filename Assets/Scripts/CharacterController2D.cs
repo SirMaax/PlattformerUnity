@@ -7,18 +7,14 @@ public class CharacterController2D : MonoBehaviour
 	[Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;			// Amount of maxSpeed applied to crouching movement. 1 = 100%
 	[Range(0, .3f)] [SerializeField] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
 	[SerializeField] private bool m_AirControl = false;							// Whether or not a player can steer while jumping;
-	[SerializeField] private LayerMask m_WhatIsGround;                          // A mask determining what is ground to the character
-	[SerializeField] private LayerMask m_WhatIsWall;                          // A mask determining what is ground to the character
+	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
 	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
-	[SerializeField] private Transform m_CeilingCheck;                          // A position marking where to check for ceilings
-	[SerializeField] private Transform m_WallCheckLeft;
-	[SerializeField] private Transform m_WallCheckRight;
+	[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
 	[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
 
-	const float k_GroundedRadius = .1f; // Radius of the overlap circle to determine if grounded
-	const float k_WalledRadius = .1f; // Radius of the overlap circle to determine if grounded
+	const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
 	private bool m_Grounded;            // Whether or not the player is grounded.
-	const float k_CeilingRadius = .1f; // Radius of the overlap circle to determine if the player can stand up
+	const float k_CeilingRadius = .2f; // Radius of the overlap circle to determine if the player can stand up
 	private Rigidbody2D m_Rigidbody2D;
 	private bool m_FacingRight = true;  // For determining which way the player is currently facing.
 	private Vector3 m_Velocity = Vector3.zero;
@@ -27,18 +23,12 @@ public class CharacterController2D : MonoBehaviour
 	[Space]
 
 	public UnityEvent OnLandEvent;
-	public UnityEvent OnWallTouchLeftEvent;
-	public UnityEvent OnWallTouchRightEvent;
 
 	[System.Serializable]
 	public class BoolEvent : UnityEvent<bool> { }
 
 	public BoolEvent OnCrouchEvent;
 	private bool m_wasCrouching = false;
-	private bool m_OnWallLeft = false;
-	private bool m_OnWallRight = false;
-
-	private Vector2 oldPlayerPos;
 
 	private void Awake()
 	{
@@ -49,24 +39,12 @@ public class CharacterController2D : MonoBehaviour
 
 		if (OnCrouchEvent == null)
 			OnCrouchEvent = new BoolEvent();
-
-		if (OnWallTouchLeftEvent == null)
-			OnWallTouchLeftEvent = new UnityEvent();
-
-		if (OnWallTouchRightEvent == null)
-			OnWallTouchRightEvent = new UnityEvent();
 	}
 
 	private void FixedUpdate()
 	{
 		bool wasGrounded = m_Grounded;
-		bool wasOnWallRight = m_OnWallRight;
-		bool wasOnWallLeft = m_OnWallLeft;
 		m_Grounded = false;
-		wasOnWallRight = false;
-		wasOnWallLeft = false;
-
-		
 
 		// The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
 		// This can be done using layers instead but Sample Assets will not overwrite your project settings.
@@ -80,57 +58,11 @@ public class CharacterController2D : MonoBehaviour
 					OnLandEvent.Invoke();
 			}
 		}
-		/*
-		
-		if (oldPlayerPos != m_Rigidbody2D.position)
-		{
-			colliders = Physics2D.OverlapCircleAll(m_WallCheckLeft.position, k_WalledRadius, m_WhatIsWall);
-
-			for (int i = 0; i < colliders.Length; i++)
-			{
-				if (colliders[i].gameObject != gameObject)
-				{
-					m_OnWallLeft = true;
-					if (!wasOnWallLeft)
-					{
-						OnWallTouchLeftEvent.Invoke();
-						oldPlayerPos = m_Rigidbody2D.position;
-					}
-				}
-			}
-		
-			colliders = Physics2D.OverlapCircleAll(m_WallCheckRight.position, k_WalledRadius, m_WhatIsWall);
-			for (int i = 0; i < colliders.Length; i++)
-			{
-				if (colliders[i].gameObject != gameObject)
-				{
-					m_OnWallRight = true;
-					if (!wasOnWallRight)
-					{
-						OnWallTouchRightEvent.Invoke();
-						oldPlayerPos = m_Rigidbody2D.position;
-					}
-				}
-			}
-		}			*/
-
 	}
 
 
 	public void Move(float move, bool crouch, bool jump)
 	{
-		//!!!OWN ADDITION !!!
-		if(Physics2D.OverlapCircle(m_WallCheckLeft.position, k_WalledRadius, m_WhatIsWall))
-        {
-			OnWallTouchLeftEvent.Invoke();
-		}
-		if (Physics2D.OverlapCircle(m_WallCheckRight.position, k_WalledRadius, m_WhatIsWall))
-		{
-			OnWallTouchRightEvent.Invoke();
-		}			
-
-
-
 		// If crouching, check to see if the character can stand up
 		if (!crouch)
 		{
@@ -203,7 +135,6 @@ public class CharacterController2D : MonoBehaviour
 
 	private void Flip()
 	{
-		
 		// Switch the way the player is labelled as facing.
 		m_FacingRight = !m_FacingRight;
 
@@ -211,6 +142,5 @@ public class CharacterController2D : MonoBehaviour
 		Vector3 theScale = transform.localScale;
 		theScale.x *= -1;
 		transform.localScale = theScale;
-		
 	}
 }
