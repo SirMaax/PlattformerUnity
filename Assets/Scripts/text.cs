@@ -11,7 +11,8 @@ public class text : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var.text = "CurrentJumpD " + player.currentJumpDuration.ToString();
+        //var.text = "CurrentJumpD " + player.currentJumpDuration.ToString();
+        var.text = Input.GetAxisRaw("ControllerRightTrigger").ToString();
 
     }
 }

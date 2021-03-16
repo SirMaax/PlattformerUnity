@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterController2D controller;
@@ -13,24 +14,34 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
     [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
     [SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
-    
+    [SerializeField] float dashForce = 0f;
+    [SerializeField] float dashCooldown = 0f;
+
     public float currentJumpDuration = 0f;                 //Length of current Jump
-    private float lastJumpYPosition = 0;                    //The starting Y Position of last jump
 
     private float horizontalMovement = 0f;                  //Important for moving left and right take input
-    private float vertialMovement = 0f;                     //Goes from 3 to -3 -> Only controls down movement right now
+    private float lastHorizontMovement = 0f;
+    private float vertialMovement = 1f;                     //Goes from 3 to -3 -> Only controls down movement right now
+    private float dashMovement = 0f;                        //0 When right should button is not pressed. 1 When pressed;
     private bool downMovement = false;                       //True = Player is pressing down , False not
 
     private bool grounded = true;                           //True when grounded in air false
     private bool airborn = false;                           //When jumping player is airborn
     private float minimumJump = 0f;                       //Counter for minimumJump
 
+    private float dashCounter = 0f;
+
 
     // Update is called once per frame
     void Update()
     {
+        //Tells in which direction the player is facing
+        if (horizontalMovement < 0) lastHorizontMovement = -1;
+        if (horizontalMovement > 0) lastHorizontMovement = 1;
+        
         horizontalMovement = Input.GetAxisRaw("Horizontal") * runSpeed;
         vertialMovement = Input.GetAxisRaw("Vertical") * runSpeed;
+        dashMovement = Input.GetAxisRaw("ControllerRightTrigger");
 
 
 
@@ -39,8 +50,6 @@ public class PlayerMovement : MonoBehaviour
             airborn = true;
             grounded = false;
             
-            lastJumpYPosition = rigidBody.position.y;
-
             currentJumpDuration = 0;
             minimumJump = 0;
             jumpHeight = 115;
@@ -65,6 +74,19 @@ public class PlayerMovement : MonoBehaviour
 
         if (airborn) currentJumpDuration++;
        
+        dashCounter++;
+        //Dash
+        if(dashMovement == 1 )
+        {
+            
+            if (dashCounter >= dashCooldown)
+            {
+                dashCounter = 0;
+                rigidBody.AddForce(new Vector2(dashForce * lastHorizontMovement, 0));
+            }
+        }
+
+
         //Makes the player jump the minimum JumpHeight
         if(minimumJump < minimumJumpHeight)
         {
