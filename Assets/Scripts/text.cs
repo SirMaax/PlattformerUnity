@@ -12,8 +12,8 @@ public class text : MonoBehaviour
     void Update()
     {
         //var.text = "CurrentJumpD " + player.currentJumpDuration.ToString();
-        //var.text = Input.GetAxisRaw("ControllerRightTrigger").ToString();
-        var.text = Input.GetAxisRaw("Horizontal").ToString();
+        var.text = Input.GetAxisRaw("ControllerRightTrigger").ToString();
+        //var.text = Input.GetAxisRaw("Horizontal").ToString();
 
     }
 }

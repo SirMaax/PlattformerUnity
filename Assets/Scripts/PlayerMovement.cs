@@ -17,20 +17,24 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float dashForce = 0f;
     [SerializeField] float dashCooldown = 0f;
     [SerializeField] float dashMultiply = 0.1f;
-    public float currentJumpDuration = 0f;                 //Length of current Jump
+    private float currentJumpDuration = 0f;                 //Length of current Jump
 
     private float horizontalMovement = 0f;                  //Important for moving left and right take input
     private float lastHorizontMovement = 0f;
     private float vertialMovement = 1f;                     //Goes from 3 to -3 -> Only controls down movement right now
-    private float dashMovement = 0f;                        //0 When right should button is not pressed. 1 When pressed;
-    private bool downMovement = false;                       //True = Player is pressing down , False not
+    
+    private float dashMovement = 0f;                        //0 When right should button is not pressed. 1 When pressed
+    private bool downMovement = false;                      //True = Player is pressing down , False not
+    private bool dashReady = true;                          //True -> PLayer can dash
 
     private bool grounded = true;                           //True when grounded in air false
     private bool airborn = false;                           //When jumping player is airborn
-    private float minimumJump = 0f;                       //Counter for minimumJump
+    private float minimumJump = 0f;                         //Counter for minimumJump
 
-    private float dashCounter = 25f;
-    private bool dashOnlyOnceInAir = true;                 //Allows the player to only dash once in air
+    public float dashCounter = 25f;
+    private bool dashOnlyOnceInAir = true;                  //Allows the player to only dash once in air
+
+    
 
     // Update is called once per frame
     void Update()
@@ -41,10 +45,18 @@ public class PlayerMovement : MonoBehaviour
         
         horizontalMovement = Input.GetAxisRaw("Horizontal") * runSpeed;
         vertialMovement = Input.GetAxisRaw("Vertical") * runSpeed;
-        dashMovement = Input.GetAxisRaw("ControllerRightTrigger");
+                                                             
+        //Disables consecuent dashing while pressing the button (without not pressing it)
+        if (dashCounter >= dashCooldown)
+        {
+            dashMovement = Input.GetAxisRaw("ControllerRightTrigger");
+            if(dashMovement == 0)
+            {
+                dashReady = true;
+            }
+        }
 
-
-
+        //Gets jump button pressed
         if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0 )
         {
             airborn = true;
@@ -55,13 +67,14 @@ public class PlayerMovement : MonoBehaviour
             jumpHeight = 115;
 
         }
+        //Gets jump button not pressed
         if (Input.GetButtonUp("Jump") && airborn )
         {
             Debug.Log("Stump stopped via not pressing");
             stopYAcceleration();
             currentJumpDuration = jumpDuration;
         }
-
+        //Moves the player down in the air
         if ((Input.GetButton("Down") || (vertialMovement < 0) && airborn))
         {
             downMovement = true;
@@ -70,26 +83,27 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         //Movement
-        
         controller.Move(horizontalMovement, false, false);
 
-
+        //Counts airTime after jumping
         if (airborn) currentJumpDuration++;
-       
+        
+        //Counts dash time after dashing
         dashCounter++;
+        
         //Dash
-        if(dashMovement == 1 )
+        if(dashMovement == 1 && dashReady)
         {
             
             if (dashCounter >= dashCooldown && dashOnlyOnceInAir)
             {
                 if (airborn) dashOnlyOnceInAir = false;
-
+                dashReady = false;
                 dashCounter = 0;
                 rigidBody.AddForce(new Vector2(lastHorizontMovement * ( dashForce - ( System.Math.Abs(horizontalMovement) * dashMultiply )), 0));
             }
         }
-
+        
 
         //Makes the player jump the minimum JumpHeight
         if(minimumJump < minimumJumpHeight)
