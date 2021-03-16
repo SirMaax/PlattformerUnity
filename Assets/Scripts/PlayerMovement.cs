@@ -134,6 +134,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnLanding()
     {
+        Debug.Log("Touched Ground");
         if (!grounded && airborn)
         {
             grounded = true;
@@ -142,8 +143,17 @@ public class PlayerMovement : MonoBehaviour
             dashOnlyOnceInAir = true;
         }
     }
+    public void OnWallTouchLeftEvent()
+    {
+        Debug.Log("Touched Wall left!");
+    }
 
-   
+
+    public void OnWallTouchRightEvent()
+    {
+        Debug.Log("Touched Wall right!");
+    }
+
     public void stopYAcceleration()
     {
         if(minimumJump > minimumJumpHeight)        
