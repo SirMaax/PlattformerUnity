@@ -10,6 +10,7 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 .Asset/Brackeys/
+/[Aa]ssets/Brackeys/
 
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
