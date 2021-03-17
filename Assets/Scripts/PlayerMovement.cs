@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float dashCooldown = 0f;
     [SerializeField] float dashMultiply = 0.1f;
 
-    private float currentJumpDuration = 0f;                 //Length of current Jump
+    public float currentJumpDuration = 0f;                 //Length of current Jump
 
     private float horizontalMovement = 0f;                  //Important for moving left and right take input
     private float lastHorizontMovement = 0f;
@@ -28,9 +28,9 @@ public class PlayerMovement : MonoBehaviour
     private bool downMovement = false;                      //True = Player is pressing down , False not
     private bool dashReady = true;                          //True -> PLayer can dash
 
-    private bool grounded = true;                           //True when grounded in air false
-    private bool airborn = false;                           //When jumping player is airborn
-    private float minimumJump = 0f;                         //Counter for minimumJump
+    public bool grounded = true;                           //True when grounded in air false
+    public bool airborn = false;                           //When jumping player is airborn
+    public float minimumJump = 0f;                         //Counter for minimumJump
 
     public float dashCounter = 25f;                         //Counts intervalls between dashes
     private bool dashOnlyOnceInAir = true;                  //Allows the player to only dash once in air
@@ -40,6 +40,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float distanceWallJumpX = 0f;          //Distance the player will jump away from the wall
     private bool doOnlyOnceTouchingWall = false;            //Used to stop Movement when hitting Wall, but only once per walltouch
     public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
+
+    [SerializeField] float timeUntilJumpInputIsDeleted = 0f;
+    public float currentTimeUntilResetCounter = 0f;
+    public bool preJumpInput = false;
+    public bool wallJump = false;
 
     // Update is called once per frame
     void Update()
@@ -61,15 +66,34 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+        //Pre Jump Input
+        if (Input.GetButtonDown("Jump") && (!grounded || airborn) )
+        {
+            preJumpInput = true;
+        }
+
+        if (Input.GetButtonDown("Jump") && !touchWallLeft)
+        {
+            Debug.Log("FIRST : pressed jump Button but was not on wall");
+        }
+        if (Input.GetButtonDown("Jump") )
+        {
+            Debug.Log("SECOND : pressed jump Button ");
+        }
+
+
         //Input for Jumping while on wall
         if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight))
         {
+            //print("First " + airborn.ToString() + " " + grounded.ToString() + " " + currentJumpDuration.ToString() + " " + jumpHeight.ToString() + " " + touchWallLeft.ToString() + " " + touchWallRight.ToString() + " " + lastPositionOnWall.ToString() + " " + rigidBody.position.x.ToString());
             airborn = true;
             grounded = false;
 
             currentJumpDuration = 0;
             minimumJump = 0;
             jumpHeight = 115;
+
+           // print("Second " + airborn.ToString() + " " + grounded.ToString() + " " + currentJumpDuration.ToString() + " " + jumpHeight.ToString() + " " + touchWallLeft.ToString() + " " + touchWallRight.ToString() + " " + lastPositionOnWall.ToString() + " " + rigidBody.position.x.ToString());
         }
         //Input for Jumping while grounded
         else if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0)
@@ -85,7 +109,6 @@ public class PlayerMovement : MonoBehaviour
         //Input for releasing the Jump Button
         if (Input.GetButtonUp("Jump") && airborn)
         {
-            Debug.Log("Stump stopped via not pressing");
             stopYAcceleration();
             currentJumpDuration = jumpDuration;
         }
@@ -119,13 +142,16 @@ public class PlayerMovement : MonoBehaviour
         StopJump();
         //TouchingWall Action
         TouchingWall();
-        
-        
+        //Counts preJumpTiming
+        TimedResetOffPreJumpInput();
+
+
         if (rigidBody.position.x != lastPositionOnWall.x)
         {
             touchWallLeft = false;
             touchWallRight = false;
         }
+        //print("Fourth:  " + airborn.ToString() + " " + grounded.ToString() + " " + currentJumpDuration.ToString() + " " + jumpHeight.ToString() + " " + touchWallLeft.ToString() + " " + touchWallRight.ToString() + " " + lastPositionOnWall.ToString() + " " + rigidBody.position.x.ToString());
     }
 
     //Stops the jump after a certain time
@@ -138,6 +164,18 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void TimedResetOffPreJumpInput()
+    {
+        if (preJumpInput)
+        {
+            if (currentTimeUntilResetCounter > timeUntilJumpInputIsDeleted)
+            {
+                preJumpInput = false;
+                currentTimeUntilResetCounter = 0;
+            }
+            currentTimeUntilResetCounter++;
+        }
+    }
     //DASH Movement regulates the dash
     public void Dash()
     {
@@ -158,6 +196,7 @@ public class PlayerMovement : MonoBehaviour
     //Makes the player jump the minimum JumpHeight
     public void Jump()
     {
+        
         float temp = 0;
         if (minimumJump < minimumJumpHeight)
         {
@@ -180,6 +219,8 @@ public class PlayerMovement : MonoBehaviour
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
             minimumJump++;
             jumpHeight -= jumpHeightRecument;
+            //print("JumpTime " + airborn.ToString() + " " + grounded.ToString() + " " + currentJumpDuration.ToString() + " " + jumpHeight.ToString() + " " + touchWallLeft.ToString() + " " + touchWallRight.ToString() + " " + lastPositionOnWall.ToString() + " " + rigidBody.position.x.ToString());
+
         }
     }
 
@@ -203,15 +244,16 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnWallTouchLeftEvent()
     {
-        if (!touchWallLeft)
-        {
+       // if (!touchWallLeft)
+        //{
             touchWallLeft = true;
             lastPositionOnWall = rigidBody.position;
             grounded = true;
             airborn = false;
             downMovement = false;
             dashOnlyOnceInAir = true;
-        }
+            //Debug.Log("Touched Left Wall");
+       // }
     }
 
 
