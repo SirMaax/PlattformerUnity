@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
     private float lastHorizontMovement = 0f;
     private float vertialMovement = 1f;                     //Goes from 3 to -3 -> Only controls down movement right now
 
-    private float dashButtonPressed = 0f;                        //0 When right should button is not pressed. 1 When pressed
+    private float dashButtonPressed = 0f;                   //0 When right should button is not pressed. 1 When pressed
     private bool downMovement = false;                      //True = Player is pressing down , False not
     private bool dashReady = true;                          //True -> PLayer can dash
 
@@ -32,15 +32,15 @@ public class PlayerMovement : MonoBehaviour
     private bool airborn = false;                           //When jumping player is airborn
     private float minimumJump = 0f;                         //Counter for minimumJump
 
-    public float dashCounter = 25f;
+    public float dashCounter = 25f;                         //Counts intervalls between dashes
     private bool dashOnlyOnceInAir = true;                  //Allows the player to only dash once in air
 
-    public bool touchWallLeft = false;
-    public bool touchWallRight = false;
-    [SerializeField] float distanceWallJumpX = 0f;
-    [SerializeField] float slideSpeedOnWall = 0f;
-    private bool doOnlyOnceTouchingWall = false;
-    public Vector2 lastPositionOnWall;
+    public bool touchWallLeft = false;                      //IF player is touching wall from the left
+    public bool touchWallRight = false;                     //IF player is touching wall from the right
+    [SerializeField] float distanceWallJumpX = 0f;          //Distance the player will jump away from the wall
+    private bool doOnlyOnceTouchingWall = false;            //Used to stop Movement when hitting Wall, but only once per walltouch
+    public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
+
     // Update is called once per frame
     void Update()
     {
@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        //Wall Jump
+        //Input for Jumping while on wall
         if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight))
         {
             airborn = true;
@@ -71,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
             minimumJump = 0;
             jumpHeight = 115;
         }
-        //Gets jump button pressed
+        //Input for Jumping while grounded
         else if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0)
         {
             airborn = true;
@@ -80,16 +80,16 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = 0;
             minimumJump = 0;
             jumpHeight = 115;
-
         }
-        //Gets jump button not pressed
+
+        //Input for releasing the Jump Button
         if (Input.GetButtonUp("Jump") && airborn)
         {
             Debug.Log("Stump stopped via not pressing");
             stopYAcceleration();
             currentJumpDuration = jumpDuration;
         }
-        //Moves the player down in the air
+        //Input for the down Button in the air
         if ((Input.GetButton("Down") || (vertialMovement < 0) && airborn))
         {
             downMovement = true;
