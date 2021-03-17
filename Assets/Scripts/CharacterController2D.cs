@@ -10,7 +10,13 @@ public class CharacterController2D : MonoBehaviour
 	[SerializeField] private LayerMask m_WhatIsGround;							// A mask determining what is ground to the character
 	[SerializeField] private Transform m_GroundCheck;							// A position marking where to check if the player is grounded.
 	[SerializeField] private Transform m_CeilingCheck;							// A position marking where to check for ceilings
-	[SerializeField] private Collider2D m_CrouchDisableCollider;				// A collider that will be disabled when crouching
+	[SerializeField] private Collider2D m_CrouchDisableCollider;                // A collider that will be disabled when crouching
+	
+	[SerializeField] private Transform m_WallCheckLeft;
+	[SerializeField] private Transform m_WallCheckRight;
+	[SerializeField] private LayerMask m_WhatIsWall;
+	//const float k_WalledRadius = .1f;
+	[SerializeField] float k_WalledRadius = .1f;
 
 	const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
 	private bool m_Grounded;            // Whether or not the player is grounded.
@@ -23,12 +29,17 @@ public class CharacterController2D : MonoBehaviour
 	[Space]
 
 	public UnityEvent OnLandEvent;
+	public UnityEvent OnWallTouchLeftEvent;
+	public UnityEvent OnWallTouchRightEvent;
 
 	[System.Serializable]
 	public class BoolEvent : UnityEvent<bool> { }
 
 	public BoolEvent OnCrouchEvent;
 	private bool m_wasCrouching = false;
+
+	private bool m_OnWallLeft = false;
+	private bool m_OnWallRight = false;
 
 	private void Awake()
 	{
@@ -39,6 +50,12 @@ public class CharacterController2D : MonoBehaviour
 
 		if (OnCrouchEvent == null)
 			OnCrouchEvent = new BoolEvent();
+
+		if (OnWallTouchLeftEvent == null)
+			OnWallTouchLeftEvent = new UnityEvent();
+
+		if (OnWallTouchRightEvent == null)
+			OnWallTouchRightEvent = new UnityEvent();
 	}
 
 	private void FixedUpdate()
@@ -63,6 +80,29 @@ public class CharacterController2D : MonoBehaviour
 
 	public void Move(float move, bool crouch, bool jump)
 	{
+		if (Physics2D.OverlapCircle(m_WallCheckLeft.position, k_WalledRadius, m_WhatIsWall))
+		{
+			if (m_FacingRight) { 
+				OnWallTouchLeftEvent.Invoke();
+				}
+			else {
+					OnWallTouchRightEvent.Invoke();
+				}
+			
+		}
+		if (Physics2D.OverlapCircle(m_WallCheckRight.position, k_WalledRadius, m_WhatIsWall))
+		{
+			if (m_FacingRight)
+			{
+				OnWallTouchRightEvent.Invoke();
+			}
+			else
+			{
+				OnWallTouchLeftEvent.Invoke();
+			}
+		}
+
+
 		// If crouching, check to see if the character can stand up
 		if (!crouch)
 		{
@@ -139,6 +179,7 @@ public class CharacterController2D : MonoBehaviour
 		m_FacingRight = !m_FacingRight;
 
 		// Multiply the player's x local scale by -1.
+		
 		Vector3 theScale = transform.localScale;
 		theScale.x *= -1;
 		transform.localScale = theScale;
