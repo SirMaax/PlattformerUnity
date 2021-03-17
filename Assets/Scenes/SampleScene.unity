@@ -613,12 +613,20 @@ MonoBehaviour:
   dashForce: 5000
   dashCooldown: 25
   dashMultiply: 550
+  currentJumpDuration: 0
+  grounded: 1
+  airborn: 0
+  minimumJump: 0
   dashCounter: 25
   touchWallLeft: 0
   touchWallRight: 0
-  distanceWallJumpX: 1500
-  slideSpeedOnWall: 0
+  distanceWallJumpX: 500
   lastPositionOnWall: {x: 0, y: 0}
+  timeUntilJumpInputIsDeleted: 50
+  currentTimeUntilResetCounter: 0
+  preJumpInput: 0
+  wallJump: 0
+  wallJumpHeight: 350
 --- !u!61 &251582805
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
     private float vertialMovement = 1f;                     //Goes from 3 to -3 -> Only controls down movement right now
 
     private float dashButtonPressed = 0f;                   //0 When right should button is not pressed. 1 When pressed
-    private bool downMovement = false;                      //True = Player is pressing down , False not
+    public bool downMovement = false;                      //True = Player is pressing down , False not
     private bool dashReady = true;                          //True -> PLayer can dash
 
     public bool grounded = true;                           //True when grounded in air false
@@ -44,7 +44,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float timeUntilJumpInputIsDeleted = 0f;
     public float currentTimeUntilResetCounter = 0f;
     public bool preJumpInput = false;
-    public bool wallJump = false;
+    public float wallJump = 0f;             //0 = No touch , 1 = left Wall ,2 = right wall
+    [SerializeField] float wallJumpHeight = 0f;
 
     // Update is called once per frame
     void Update()
@@ -88,6 +89,9 @@ public class PlayerMovement : MonoBehaviour
             //print("First " + airborn.ToString() + " " + grounded.ToString() + " " + currentJumpDuration.ToString() + " " + jumpHeight.ToString() + " " + touchWallLeft.ToString() + " " + touchWallRight.ToString() + " " + lastPositionOnWall.ToString() + " " + rigidBody.position.x.ToString());
             airborn = true;
             grounded = false;
+            
+            if (touchWallLeft) wallJump = 1;
+            else wallJump = 2;
 
             currentJumpDuration = 0;
             minimumJump = 0;
@@ -138,7 +142,7 @@ public class PlayerMovement : MonoBehaviour
         Jump();
         //DownMovement in air
         DownMovement();
-        //Stopes jump in air
+        //Stopp's jump in air
         StopJump();
         //TouchingWall Action
         TouchingWall();
@@ -146,10 +150,16 @@ public class PlayerMovement : MonoBehaviour
         TimedResetOffPreJumpInput();
 
 
-        if (rigidBody.position.x != lastPositionOnWall.x)
+        if (rigidBody.position.x != lastPositionOnWall.x )
         {
             touchWallLeft = false;
             touchWallRight = false;
+        }
+
+        if(wallJump != 0)
+        {
+            airborn = true;
+            grounded = false;
         }
         //print("Fourth:  " + airborn.ToString() + " " + grounded.ToString() + " " + currentJumpDuration.ToString() + " " + jumpHeight.ToString() + " " + touchWallLeft.ToString() + " " + touchWallRight.ToString() + " " + lastPositionOnWall.ToString() + " " + rigidBody.position.x.ToString());
     }
@@ -161,6 +171,8 @@ public class PlayerMovement : MonoBehaviour
         if (currentJumpDuration >= jumpDuration)
         {
             stopYAcceleration();
+            
+            
         }
     }
 
@@ -196,18 +208,20 @@ public class PlayerMovement : MonoBehaviour
     //Makes the player jump the minimum JumpHeight
     public void Jump()
     {
-        
+        jumpHeight = 115;
         float temp = 0;
         if (minimumJump < minimumJumpHeight)
         {
 
-            if (touchWallLeft)
+            if (wallJump == 1)
             {
                 temp = distanceWallJumpX;
+                jumpHeight = wallJumpHeight;
             }
-            else if (touchWallRight)
+            else if (wallJump == 2)
             {
                 temp = -distanceWallJumpX;
+                jumpHeight = wallJumpHeight;
             }
 
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
@@ -229,6 +243,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (downMovement && airborn)
         {
+            Debug.Log("DOwnForce now is");
             rigidBody.AddForce(new Vector2(0, -downMovementForce));
         }
     }
@@ -240,7 +255,9 @@ public class PlayerMovement : MonoBehaviour
             airborn = false;
             downMovement = false;
             dashOnlyOnceInAir = true;
+            
         }
+        wallJump = 0;
     }
     public void OnWallTouchLeftEvent()
     {
@@ -252,6 +269,7 @@ public class PlayerMovement : MonoBehaviour
             airborn = false;
             downMovement = false;
             dashOnlyOnceInAir = true;
+         
             //Debug.Log("Touched Left Wall");
        // }
     }
@@ -259,15 +277,15 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnWallTouchRightEvent()
     {
-        if (!touchWallRight)
-        {
+        //if (!touchWallRight)
+        //{
             touchWallRight = true;
             lastPositionOnWall = rigidBody.position;
             grounded = true;
             airborn = false;
             downMovement = false;
             dashOnlyOnceInAir = true;
-        }
+        //}
     }
 
     //Stops Y Movement 
