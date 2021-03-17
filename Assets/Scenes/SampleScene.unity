@@ -614,19 +614,20 @@ MonoBehaviour:
   dashCooldown: 25
   dashMultiply: 550
   currentJumpDuration: 0
+  downMovement: 0
   grounded: 1
   airborn: 0
   minimumJump: 0
   dashCounter: 25
   touchWallLeft: 0
   touchWallRight: 0
-  distanceWallJumpX: 500
+  distanceWallJumpX: 350
   lastPositionOnWall: {x: 0, y: 0}
   timeUntilJumpInputIsDeleted: 50
   currentTimeUntilResetCounter: 0
   preJumpInput: 0
   wallJump: 0
-  wallJumpHeight: 350
+  wallJumpHeight: 120
 --- !u!61 &251582805
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1221,7 +1222,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1064074716}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.7, y: 4.63, z: 1.0079966}
+  m_LocalPosition: {x: -1.33, y: 3.7, z: 1.0079966}
   m_LocalScale: {x: 1.3009536, y: 3.2853994, z: 1}
   m_Children: []
   m_Father: {fileID: 1809107657}

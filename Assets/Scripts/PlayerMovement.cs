@@ -300,7 +300,19 @@ public class PlayerMovement : MonoBehaviour
     public void TouchingWall()
     {
         {
-            if (touchWallLeft || touchWallRight)
+            if (touchWallRight && horizontalMovement != -1)
+            {
+
+                if (!doOnlyOnceTouchingWall)
+                {
+                    rigidBody.velocity = Vector2.zero;
+                    doOnlyOnceTouchingWall = true;
+                }
+
+                rigidBody.velocity = new Vector2(0, 0);
+                //rigidBody.isKinematic = true;
+            }
+            if (touchWallLeft && horizontalMovement != 1)
             {
 
                 if (!doOnlyOnceTouchingWall)
