@@ -82,24 +82,31 @@ public class CharacterController2D : MonoBehaviour
 	{
 		if (Physics2D.OverlapCircle(m_WallCheckLeft.position, k_WalledRadius, m_WhatIsWall))
 		{
-			if (m_FacingRight) { 
-				OnWallTouchLeftEvent.Invoke();
+			
+			
+				if (m_FacingRight)
+				{
+					OnWallTouchLeftEvent.Invoke();
 				}
-			else {
+				else
+				{
 					OnWallTouchRightEvent.Invoke();
 				}
 			
 		}
 		if (Physics2D.OverlapCircle(m_WallCheckRight.position, k_WalledRadius, m_WhatIsWall))
 		{
-			if (m_FacingRight)
-			{
-				OnWallTouchRightEvent.Invoke();
-			}
-			else
-			{
-				OnWallTouchLeftEvent.Invoke();
-			}
+			
+			
+				if (m_FacingRight)
+				{
+					OnWallTouchRightEvent.Invoke();
+				}
+				else
+				{
+					OnWallTouchLeftEvent.Invoke();
+				}
+			
 		}
 
 
