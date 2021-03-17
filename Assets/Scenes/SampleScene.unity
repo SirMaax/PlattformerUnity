@@ -627,7 +627,7 @@ MonoBehaviour:
   currentTimeUntilResetCounter: 0
   preJumpInput: 0
   wallJump: 0
-  wallJumpHeight: 120
+  wallJumpHeight: 85
 --- !u!61 &251582805
 BoxCollider2D:
   m_ObjectHideFlags: 0

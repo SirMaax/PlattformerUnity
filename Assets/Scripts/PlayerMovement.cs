@@ -203,7 +203,7 @@ public class PlayerMovement : MonoBehaviour
         float temp = 0;
         if (minimumJump < minimumJumpHeight)
         {
-
+            downMovement = false;
             if (wallJump == 1)
             {
                 temp = distanceWallJumpX;
@@ -236,7 +236,8 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnLanding()
     {
-        if (!grounded && airborn)
+        Debug.Log(grounded);
+        if (!grounded && (airborn || touchWallRight ||touchWallLeft))
         {
             grounded = true;
             airborn = false;
@@ -250,7 +251,7 @@ public class PlayerMovement : MonoBehaviour
     {
             touchWallLeft = true;
             lastPositionOnWall = rigidBody.position;
-            grounded = true;
+            //grounded = true;
             airborn = false;
             //downMovement = false;
             dashOnlyOnceInAir = true;
@@ -261,7 +262,7 @@ public class PlayerMovement : MonoBehaviour
     {
             touchWallRight = true;
             lastPositionOnWall = rigidBody.position;
-            grounded = true;
+            //grounded = true;
             airborn = false;
             //downMovement = false;
             dashOnlyOnceInAir = true;
@@ -279,9 +280,8 @@ public class PlayerMovement : MonoBehaviour
     public void TouchingWall()
     {
         {
-            if (downMovement && (touchWallLeft || touchWallRight) )
+            if (downMovement && !grounded &&(touchWallLeft || touchWallRight) )
             {
-                Debug.Log("Downforce Movement on Wall Applied");
                 rigidBody.velocity = new Vector2(0, -downMovementForce/2);
             }
             else if (touchWallRight && horizontalMovement != -1)
