@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float dashForce = 0f;
     [SerializeField] float dashCooldown = 0f;
     [SerializeField] float dashMultiply = 0.1f;
+    [SerializeField] float moveFromWallAway = 0f;
 
     public float currentJumpDuration = 0f;                 //Length of current Jump
 
@@ -46,6 +47,8 @@ public class PlayerMovement : MonoBehaviour
     public bool preJumpInput = false;
     public float wallJump = 0f;             //0 = No touch , 1 = left Wall ,2 = right wall
     [SerializeField] float wallJumpHeight = 0f;
+
+    public bool weirdGroundWallJump = false;
 
     // Update is called once per frame
     void Update()
@@ -78,7 +81,7 @@ public class PlayerMovement : MonoBehaviour
 
 
         //Input for Jumping while on wall
-        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight))
+        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight) &&!weirdGroundWallJump)
         {
             airborn = true;
             grounded = false;
@@ -89,6 +92,7 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = 0;
             minimumJump = 0;
             jumpHeight = 115;
+            
 
         }
         //Input for Jumping while grounded
@@ -237,35 +241,71 @@ public class PlayerMovement : MonoBehaviour
     public void OnLanding()
     {
         Debug.Log(grounded);
-        if (!grounded && (airborn || touchWallRight ||touchWallLeft))
+        if (!grounded )
         {
+            weirdGroundWallJump = false;
             grounded = true;
             airborn = false;
             downMovement = false;
             dashOnlyOnceInAir = true;
-            
+            if (touchWallLeft) transform.position = new Vector2(rigidBody.position.x + moveFromWallAway, rigidBody.position.y);
+            else if (touchWallRight) transform.position = new Vector2(rigidBody.position.x - moveFromWallAway, rigidBody.position.y);
         }
         wallJump = 0;
     }
     public void OnWallTouchLeftEvent()
     {
+        if (weirdGroundWallJump && horizontalMovement == -1 && airborn)
+        {
             touchWallLeft = true;
             lastPositionOnWall = rigidBody.position;
-            //grounded = true;
             airborn = false;
-            //downMovement = false;
             dashOnlyOnceInAir = true;
+            weirdGroundWallJump = false;
+            currentJumpDuration = jumpDuration;
+            minimumJump = minimumJumpHeight;
+            rigidBody.velocity = Vector2.zero;
+        }
+        else if (grounded)
+        {
+            weirdGroundWallJump = true;
+        }else if (!grounded && !weirdGroundWallJump)
+        {
+            touchWallLeft = true;
+            lastPositionOnWall = rigidBody.position;
+            airborn = false;
+            dashOnlyOnceInAir = true;
+            weirdGroundWallJump = false;
+        }
     }
 
 
     public void OnWallTouchRightEvent()
     {
+        if (weirdGroundWallJump && horizontalMovement == 1 && airborn)
+        {
             touchWallRight = true;
             lastPositionOnWall = rigidBody.position;
-            //grounded = true;
             airborn = false;
-            //downMovement = false;
             dashOnlyOnceInAir = true;
+            weirdGroundWallJump = false;
+            currentJumpDuration = jumpDuration;
+            minimumJump = minimumJumpHeight;
+            rigidBody.velocity = Vector2.zero;
+        }
+        else if (grounded)
+        {
+            weirdGroundWallJump = true;
+        }
+        else if (!grounded && !weirdGroundWallJump)
+        {
+            touchWallRight = true;
+            lastPositionOnWall = rigidBody.position;
+            airborn = false;
+            dashOnlyOnceInAir = true;
+            weirdGroundWallJump = false;
+        
+        }
     }
 
     //Stops Y Movement 
