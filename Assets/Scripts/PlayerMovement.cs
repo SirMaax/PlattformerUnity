@@ -192,7 +192,12 @@ public class PlayerMovement : MonoBehaviour
             //Stops dash when it should be over and when already dashed once in air
             if (dashCounter >= dashCooldown && dashOnlyOnceInAir)
             {
-                if (airborn) dashOnlyOnceInAir = false;
+
+                if (airborn)
+                {
+                    dashOnlyOnceInAir = false;
+                    rigidBody.velocity = Vector2.zero;
+                }
                 dashReady = false;
                 dashCounter = 0;
                 rigidBody.AddForce(new Vector2(lastHorizontMovement * (dashForce - (System.Math.Abs(horizontalMovement) * dashMultiply)), 0));
