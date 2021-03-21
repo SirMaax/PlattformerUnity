@@ -63,6 +63,7 @@ public class PlayerMovement : MonoBehaviour
         if (horizontalMovement > 0) lastHorizontMovement = 1;
 
         horizontalMovement = Input.GetAxisRaw("Horizontal") * runSpeed;
+        Debug.Log("First occasion" + horizontalMovement);
         vertialMovement = Input.GetAxisRaw("Vertical") * runSpeed;
 
         animator.SetFloat("Speed", Mathf.Abs(horizontalMovement));
@@ -398,7 +399,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if(rigidBody.velocity.y <= maxDownSpeed)
         {
-            Vector2 temp = new Vector2(0, maxDownSpeed);
+            Debug.Log(horizontalMovement);
+            Vector2 temp = new Vector2(horizontalMovement *10 , maxDownSpeed);
             rigidBody.velocity = temp;
         }
     }
