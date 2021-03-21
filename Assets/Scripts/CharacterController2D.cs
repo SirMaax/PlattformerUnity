@@ -190,4 +190,12 @@ public class CharacterController2D : MonoBehaviour
 		theScale.x *= -1;
 		transform.localScale = theScale;
 	}
+
+	private void OnDrawGizmosSelected()
+	{
+		
+
+
+		Gizmos.DrawWireSphere(m_WallCheckLeft.position, k_WalledRadius);
+	}
 }
