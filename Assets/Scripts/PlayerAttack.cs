@@ -80,6 +80,6 @@ public class PlayerAttack : MonoBehaviour
         if (swordPointNormal == null) return;
 
 
-        Gizmos.DrawWireSphere(swordPointDown.position, detectionCircle);
+        //Gizmos.DrawWireSphere(swordPointDown.position, detectionCircle);
     }
 }

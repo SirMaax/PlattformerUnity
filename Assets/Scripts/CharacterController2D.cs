@@ -196,6 +196,6 @@ public class CharacterController2D : MonoBehaviour
 		
 
 
-		Gizmos.DrawWireSphere(m_WallCheckLeft.position, k_WalledRadius);
+		Gizmos.DrawWireSphere(m_WallCheckRight.position, k_WalledRadius);
 	}
 }

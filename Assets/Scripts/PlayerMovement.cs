@@ -63,7 +63,6 @@ public class PlayerMovement : MonoBehaviour
         if (horizontalMovement > 0) lastHorizontMovement = 1;
 
         horizontalMovement = Input.GetAxisRaw("Horizontal") * runSpeed;
-        Debug.Log("First occasion" + horizontalMovement);
         vertialMovement = Input.GetAxisRaw("Vertical") * runSpeed;
 
         animator.SetFloat("Speed", Mathf.Abs(horizontalMovement));
@@ -167,8 +166,8 @@ public class PlayerMovement : MonoBehaviour
             
             touchWallLeft = false;
             touchWallRight = false;
-            animator.SetBool("ClimbingLeft", false);
-            animator.SetBool("ClimbingRight", false);
+            animator.SetBool("Walled", false);
+
             //animator.SetBool("JumpingDown", false);
         }
 
@@ -264,8 +263,7 @@ public class PlayerMovement : MonoBehaviour
         if (!grounded )
         {
             animator.SetBool("JumpingDown", false);
-            animator.SetBool("ClimbingLeft", false);
-            animator.SetBool("ClimbingRight", false);
+            animator.SetBool("Walled", false);
             weirdGroundWallJump = false;
             grounded = true;
             airborn = false;
@@ -279,10 +277,12 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnWallTouchLeftEvent()
     {
+        
         if (weirdGroundWallJump && horizontalMovement == -1 && airborn)
         {
             animator.SetBool("JumpingDown", false);
-            animator.SetBool("ClimbingLeft", true);
+            //animator.SetBool("ClimbingLeft", true);
+            animator.SetBool("Walled", true);
             touchWallLeft = true;
             lastPositionOnWall = rigidBody.position;
             airborn = false;
@@ -291,11 +291,7 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = jumpDuration;
             minimumJump = minimumJumpHeight;
             rigidBody.velocity = Vector2.zero;
-            if (!DoOnlyOnce)
-            {
-                animator.SetBool("ClimbingLeft", true);
-                DoOnlyOnce = true;
-            }
+           
         }
         else if (grounded)
         {
@@ -304,27 +300,26 @@ public class PlayerMovement : MonoBehaviour
         {
             
             animator.SetBool("JumpingDown", false);
-            
+            animator.SetBool("Walled", true);
+
             touchWallLeft = true;
             lastPositionOnWall = rigidBody.position;
             airborn = false;
             dashOnlyOnceInAir = true;
             weirdGroundWallJump = false;
-            if (!DoOnlyOnce)
-            {
-                animator.SetBool("ClimbingLeft", true);
-                DoOnlyOnce = true;
-            }
+            
         }
     }
 
 
     public void OnWallTouchRightEvent()
     {
+        
         if (weirdGroundWallJump && horizontalMovement == 1 && airborn)
         {
             animator.SetBool("JumpingDown", false);
-            animator.SetBool("ClimbingRight", true);
+          //  animator.SetBool("ClimbingRight", true);
+            animator.SetBool("Walled", true);
             touchWallRight = true;
             lastPositionOnWall = rigidBody.position;
             airborn = false;
@@ -341,7 +336,8 @@ public class PlayerMovement : MonoBehaviour
         else if (!grounded && !weirdGroundWallJump)
         {
             animator.SetBool("JumpingDown", false);
-            animator.SetBool("ClimbingRight", true);
+           // animator.SetBool("ClimbingRight", true);
+            animator.SetBool("Walled", true);
             touchWallRight = true;
             lastPositionOnWall = rigidBody.position;
             airborn = false;
@@ -349,8 +345,9 @@ public class PlayerMovement : MonoBehaviour
             weirdGroundWallJump = false;
         
         }
-    }
+    }   
 
+ 
     //Stops Y Movement 
     public void stopYAcceleration()
     {
@@ -399,7 +396,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if(rigidBody.velocity.y <= maxDownSpeed)
         {
-            Debug.Log(horizontalMovement);
             Vector2 temp = new Vector2(horizontalMovement *10 , maxDownSpeed);
             rigidBody.velocity = temp;
         }
