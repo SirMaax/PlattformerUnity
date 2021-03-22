@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [SerializeField] float swordAttackCooldown;
+    
     public Animator animator;
-
     public Transform swordChecker;
+    public PlayerMovement player;
 
     public Transform swordPointNormal;
     public Transform swordPointUp;
@@ -14,19 +16,21 @@ public class PlayerAttack : MonoBehaviour
     public float detectionCircle = 0.5f;
     public LayerMask enemieLayer;
 
-    private float horizontal = 0f;
+    private float horizontal = 0f;              //Keeps PlayerMovement horzontal from player
     private float vertical = 0f;
     private bool airborn = false;    // Update is called once per frame
-    public PlayerMovement player;
 
+    private float currentSwordAttackCounter = 0f;
     void Update()
     {
         horizontal = Input.GetAxisRaw("Horizontal");
         vertical = Input.GetAxisRaw("Vertical");
         airborn = player.airborn;
-        if (Input.GetButtonDown("Attack"))
-        {
+        currentSwordAttackCounter++;
 
+        if (Input.GetButtonDown("Attack") && currentSwordAttackCounter >= swordAttackCooldown)
+        {
+            currentSwordAttackCounter = 0;
             if (airborn && vertical < 0)
             {
                 animator.SetTrigger("AttackAirDown");
@@ -76,6 +80,6 @@ public class PlayerAttack : MonoBehaviour
         if (swordPointNormal == null) return;
 
 
-        Gizmos.DrawWireSphere(swordPointNormal.position, detectionCircle);
+        Gizmos.DrawWireSphere(swordPointDown.position, detectionCircle);
     }
 }
