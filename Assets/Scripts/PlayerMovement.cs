@@ -55,6 +55,8 @@ public class PlayerMovement : MonoBehaviour
 
     private bool DoOnlyOnce = false;                  //TEST
 
+    private bool slideDownWall = false;
+
     public Animator animator;
     // Update is called once per frame
     void Update()
@@ -108,6 +110,7 @@ public class PlayerMovement : MonoBehaviour
         {
             downMovement = true;
         }
+        
     }
 
     /// <summary>
@@ -296,10 +299,18 @@ public class PlayerMovement : MonoBehaviour
     //Is triggered when the wall is right from the player
     public void OnWallTouchRightEvent()
     {
-        Debug.Log("Touched Wall right method");
-        if (downMovement)
+        if (downMovement )
         {
+            slideDownWall = true;
             touchWallRight = false;
+            //If slide Down Wall was used before and the player is not pressing down right now. It is set to false
+            if(vertialMovement == 0 && slideDownWall)
+            {
+                canConnectToWAll = true;
+                slideDownWall = false;
+                downMovement = false;
+                OnWallTouchRightEvent();
+            }
             return;
         }
         if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement )
@@ -316,13 +327,21 @@ public class PlayerMovement : MonoBehaviour
     //Is triggered when the wall is left from the player
     public void OnWallTouchLeftEvent()
     {
-        Debug.Log("Touched Wall left method");
         if (downMovement)
         {
+            slideDownWall = true;
             touchWallLeft = false;
+            //If slide Down Wall was used before and the player is not pressing down right now. It is set to false
+            if (vertialMovement == 0 && slideDownWall)
+            {
+                canConnectToWAll = true;
+                slideDownWall = false;
+                downMovement = false;
+                OnWallTouchLeftEvent();
+            }
             return;
         }
-        if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll)
+            if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll)
         {
             touchWallLeft = true;
             
