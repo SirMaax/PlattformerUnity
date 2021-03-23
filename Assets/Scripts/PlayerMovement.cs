@@ -46,9 +46,10 @@ public class PlayerMovement : MonoBehaviour
     public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
     public bool weirdGroundWallJump = false;                //When starting a jump next to a wall
 
-    [SerializeField] float maxDownSpeed = 0f; 
+    [SerializeField] float maxDownSpeed = 0f;
 
-
+    [SerializeField] float wallSlideSpeed;
+    public bool canConnectToWAll = true;
 
 
 
@@ -77,48 +78,29 @@ public class PlayerMovement : MonoBehaviour
             }
         }
         
-        /*  Not Implemented yet
-        //Pre Jump Input
-        if (Input.GetButtonDown("Jump") && (!grounded || airborn) )
-        {
-            preJumpInput = true;
-        }*/
-
-        
-
-
         //Input for Jumping while on wall
-        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight) &&!weirdGroundWallJump)
+        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight) )
         {
-            airborn = true;
-            grounded = false;
-            
-            if (touchWallLeft) wallJump = 1;
-            else wallJump = 2;
-
-            currentJumpDuration = 0;
-            minimumJump = 0;
-            jumpHeight = 115;
-            
-
+            Debug.Log("WAllJump used");
+            if (touchWallLeft) {
+                    wallJump = 1;
+            }
+            else {
+                    wallJump = 2;
+            }
+            Debug.Log(wallJump);
+            ResetJumpVar();
         }
         //Input for Jumping while grounded
         else if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0)
         {
-            animator.SetBool("JumpingUp", true);
-            
-            airborn = true;
-            grounded = false;
-
-            currentJumpDuration = 0;
-            minimumJump = 0;
-            jumpHeight = 115;
+            ResetJumpVar();
         }
 
         //Input for releasing the Jump Button
         if (Input.GetButtonUp("Jump") && airborn)
         {
-            stopYAcceleration();
+            StopYAcceleration();
             currentJumpDuration = jumpDuration;
         }
         //Input for the down Button in the air
@@ -137,10 +119,12 @@ public class PlayerMovement : MonoBehaviour
         //Clamp gravityDownFallSpeed
         ClampGravity();
         //Counts airtime
-        if (airborn) currentJumpDuration++;
+        // if (airborn) currentJumpDuration++;
         //Counts intervall between dashes
         dashCounter++;
-
+        //Slide down Wall
+        if (wallJump == 0 && (touchWallLeft ||touchWallRight ))
+            rigidBody.velocity = new Vector2(0, wallSlideSpeed);
         //Movement
         controller.Move(horizontalMovement, false, false);
         //Dash
@@ -152,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
         //Stopp's jump in air
         StopJump();
         //TouchingWall Action
-        TouchingWall();
+        //TouchingWall();
         //Counts preJumpTiming
 
         //ANIMATION PART
@@ -161,15 +145,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("JumpingDown", false);
         }
 
-        if (rigidBody.position.x != lastPositionOnWall.x )
-        {
-            
-            touchWallLeft = false;
-            touchWallRight = false;
-            animator.SetBool("Walled", false);
-
-            //animator.SetBool("JumpingDown", false);
-        }
+        
 
         if(wallJump != 0)
         {
@@ -182,14 +158,19 @@ public class PlayerMovement : MonoBehaviour
     public void StopJump()
     {
         //Stops air acceleration after jumpDuratio is ovestepped
-        if (currentJumpDuration >= jumpDuration)
+        if (currentJumpDuration >= jumpDuration && !DoOnlyOnce)
         {
-            stopYAcceleration();
-            if(!touchWallLeft || touchWallRight)
+            DoOnlyOnce = true;
+            StopYAcceleration();
+            wallJump = 0;
+            if(wallJump != 0)
             {
+                touchWallLeft = false;
+                touchWallRight = false;
+            }
             animator.SetBool("JumpingDown", true);
             animator.SetBool("JumpingUp", false);
-            }
+
         }
     }
 
@@ -238,13 +219,20 @@ public class PlayerMovement : MonoBehaviour
             }
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
             minimumJump += 0.1f;
+            
+            if (minimumJump == minimumJumpHeight && wallJump != 0)
+            {
+                canConnectToWAll = true;
+            }
         }
 
         if (!grounded && currentJumpDuration < jumpDuration && minimumJump >= minimumJumpHeight)
-        {
+        {        
+                currentJumpDuration++;
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
+            
             minimumJump++;
-            jumpHeight -= jumpHeightRecument;
+            //jumpHeight -= jumpHeightRecument;
         }
     }
 
@@ -253,6 +241,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (downMovement && airborn)
         {
+            Debug.Log("DOWN Movement");
             rigidBody.AddForce(new Vector2(0, -downMovementForce));
             animator.SetBool("JumpingUp", false);
             animator.SetBool("JumpingDown", true);
@@ -263,8 +252,8 @@ public class PlayerMovement : MonoBehaviour
         if (!grounded )
         {
             animator.SetBool("JumpingDown", false);
-            animator.SetBool("Walled", false);
-            weirdGroundWallJump = false;
+           // animator.SetBool("Walled", false);
+           // weirdGroundWallJump = false;
             grounded = true;
             airborn = false;
             downMovement = false;
@@ -272,120 +261,24 @@ public class PlayerMovement : MonoBehaviour
             if (touchWallLeft) transform.position = new Vector2(rigidBody.position.x + moveFromWallAway, rigidBody.position.y);
             else if (touchWallRight) transform.position = new Vector2(rigidBody.position.x - moveFromWallAway, rigidBody.position.y);
             currentJumpDuration = 0;                //GERADE HINZUGEFÜGT
+            canConnectToWAll = true;
+            DoOnlyOnce = false;
         }
         wallJump = 0;
     }
-    public void OnWallTouchLeftEvent()
-    {
-        
-        if (weirdGroundWallJump && horizontalMovement == -1 && airborn)
-        {
-            animator.SetBool("JumpingDown", false);
-            //animator.SetBool("ClimbingLeft", true);
-            animator.SetBool("Walled", true);
-            touchWallLeft = true;
-            lastPositionOnWall = rigidBody.position;
-            airborn = false;
-            dashOnlyOnceInAir = true;
-            weirdGroundWallJump = false;
-            currentJumpDuration = jumpDuration;
-            minimumJump = minimumJumpHeight;
-            rigidBody.velocity = Vector2.zero;
-           
-        }
-        else if (grounded)
-        {
-            weirdGroundWallJump = true;
-        }else if (!grounded && !weirdGroundWallJump)
-        {
-            
-            animator.SetBool("JumpingDown", false);
-            animator.SetBool("Walled", true);
-
-            touchWallLeft = true;
-            lastPositionOnWall = rigidBody.position;
-            airborn = false;
-            dashOnlyOnceInAir = true;
-            weirdGroundWallJump = false;
-            
-        }
-    }
-
-
-    public void OnWallTouchRightEvent()
-    {
-        
-        if (weirdGroundWallJump && horizontalMovement == 1 && airborn)
-        {
-            animator.SetBool("JumpingDown", false);
-          //  animator.SetBool("ClimbingRight", true);
-            animator.SetBool("Walled", true);
-            touchWallRight = true;
-            lastPositionOnWall = rigidBody.position;
-            airborn = false;
-            dashOnlyOnceInAir = true;
-            weirdGroundWallJump = false;
-            currentJumpDuration = jumpDuration;
-            minimumJump = minimumJumpHeight;
-            rigidBody.velocity = Vector2.zero;
-        }
-        else if (grounded)
-        {
-            weirdGroundWallJump = true;
-        }
-        else if (!grounded && !weirdGroundWallJump)
-        {
-            animator.SetBool("JumpingDown", false);
-           // animator.SetBool("ClimbingRight", true);
-            animator.SetBool("Walled", true);
-            touchWallRight = true;
-            lastPositionOnWall = rigidBody.position;
-            airborn = false;
-            dashOnlyOnceInAir = true;
-            weirdGroundWallJump = false;
-        
-        }
-    }   
 
  
     //Stops Y Movement 
-    public void stopYAcceleration()
+    public void StopYAcceleration()
     {
         if (minimumJump > minimumJumpHeight)
             rigidBody.AddForce(new Vector2(0, -downMovementForce));
 
     }
 
-    //What happens when the wall is touched
-    public void TouchingWall()
-    {
-        {
-            if (downMovement && !grounded &&(touchWallLeft || touchWallRight) )
-            {
-                rigidBody.velocity = new Vector2(0, -downMovementForce/2);
-            }
-            else if (touchWallRight && horizontalMovement != -1)
-            {
+   
 
-                if (!doOnlyOnceTouchingWall)
-                {
-                    rigidBody.velocity = Vector2.zero;
-                    doOnlyOnceTouchingWall = true;
-                }
-                rigidBody.velocity = new Vector2(0, 0);
-            }
-            else if (touchWallLeft && horizontalMovement != 1)
-            {
-                if (!doOnlyOnceTouchingWall)
-                {
-                    rigidBody.velocity = Vector2.zero;
-                    doOnlyOnceTouchingWall = true;
-                }
-                rigidBody.velocity = new Vector2(0, 0);
-            }
-        }
-    }
-
+    //Pogo in air
     public void HitTargetInAir()
     {
         rigidBody.velocity = Vector2.zero;
@@ -399,5 +292,84 @@ public class PlayerMovement : MonoBehaviour
             Vector2 temp = new Vector2(horizontalMovement *10 , maxDownSpeed);
             rigidBody.velocity = temp;
         }
+    }
+    //Is triggered when the wall is right from the player
+    public void OnWallTouchRightEvent()
+    {
+        Debug.Log("Touched Wall right method");
+        if (downMovement)
+        {
+            touchWallRight = false;
+            return;
+        }
+        if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement )
+        {
+            touchWallRight = true;
+            
+            ResetWallVar();
+        }
+        else if(horizontalMovement < 0) // LEAVING WALL
+        {
+            LeavingWallVar();
+        }
+    }
+    //Is triggered when the wall is left from the player
+    public void OnWallTouchLeftEvent()
+    {
+        Debug.Log("Touched Wall left method");
+        if (downMovement)
+        {
+            touchWallLeft = false;
+            return;
+        }
+        if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll)
+        {
+            touchWallLeft = true;
+            
+            ResetWallVar();
+        }
+        else if (horizontalMovement > 0) // LEAVING WALL
+        {
+            LeavingWallVar();
+        }
+    }
+
+    private void ResetJumpVar()
+    {
+        animator.SetBool("JumpingUp", true);
+
+        touchWallRight = false;
+        touchWallLeft = false;
+
+        airborn = true;
+        grounded = false;
+
+        currentJumpDuration = 0;
+        minimumJump = 0;
+        jumpHeight = 115;
+    }
+    //USED for when touching wall
+    private void ResetWallVar()
+    {
+        currentJumpDuration = jumpDuration;
+        minimumJump = minimumJumpHeight;
+        wallJump = 0;
+        canConnectToWAll = false;
+        dashOnlyOnceInAir = true;
+        animator.SetBool("Walled", true);
+        animator.SetBool("JumpingDown", false);
+        animator.SetBool("JumpingUp", false);
+    }
+
+    private void LeavingWallVar()
+    {
+        touchWallLeft = false;
+        touchWallRight = false;
+        animator.SetBool("Walled", false);
+        animator.SetBool("JumpingDown", true);
+
+        //Resetting WallJump for new jump
+        wallJump = 0;
+        canConnectToWAll = true;
     }
 }
