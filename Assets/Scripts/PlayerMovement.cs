@@ -231,7 +231,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (!grounded && currentJumpDuration < jumpDuration && minimumJump >= minimumJumpHeight)
         {        
-                currentJumpDuration++;
+            currentJumpDuration++;
+            if (wallJump != 0) jumpHeight = wallJumpHeight;
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
             
             minimumJump++;
