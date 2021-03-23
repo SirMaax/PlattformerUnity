@@ -162,7 +162,6 @@ public class PlayerMovement : MonoBehaviour
         //Stops air acceleration after jumpDuratio is ovestepped
         if (currentJumpDuration >= jumpDuration && !DoOnlyOnce && !touchWallLeft && !touchWallRight)
         {
-            Debug.Log("Do only once now true");
             DoOnlyOnce = true;
             StopYAcceleration();
             wallJump = 0;
