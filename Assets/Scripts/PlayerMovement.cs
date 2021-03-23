@@ -83,7 +83,6 @@ public class PlayerMovement : MonoBehaviour
         //Input for Jumping while on wall
         if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight) )
         {
-            Debug.Log("WAllJump used");
             if (touchWallLeft) {
                     wallJump = 1;
             }
@@ -161,8 +160,9 @@ public class PlayerMovement : MonoBehaviour
     public void StopJump()
     {
         //Stops air acceleration after jumpDuratio is ovestepped
-        if (currentJumpDuration >= jumpDuration && !DoOnlyOnce)
+        if (currentJumpDuration >= jumpDuration && !DoOnlyOnce && !touchWallLeft && !touchWallRight)
         {
+            Debug.Log("Do only once now true");
             DoOnlyOnce = true;
             StopYAcceleration();
             wallJump = 0;
@@ -187,6 +187,8 @@ public class PlayerMovement : MonoBehaviour
             //Stops dash when it should be over and when already dashed once in air
             if (dashCounter >= dashCooldown && dashOnlyOnceInAir)
             {
+                //Animation
+                animator.SetBool("Walled", false);
 
                 if (airborn)
                 {
@@ -256,7 +258,7 @@ public class PlayerMovement : MonoBehaviour
         if (!grounded )
         {
             animator.SetBool("JumpingDown", false);
-           // animator.SetBool("Walled", false);
+            animator.SetBool("Walled", false);
            // weirdGroundWallJump = false;
             grounded = true;
             airborn = false;
@@ -345,7 +347,7 @@ public class PlayerMovement : MonoBehaviour
             if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll)
         {
             touchWallLeft = true;
-            
+            Debug.Log("SET TO FALSE DO ONLY ONCE");
             ResetWallVar();
         }
         else if (horizontalMovement > 0) // LEAVING WALL
@@ -357,7 +359,7 @@ public class PlayerMovement : MonoBehaviour
     private void ResetJumpVar()
     {
         animator.SetBool("JumpingUp", true);
-
+        DoOnlyOnce = false;
         touchWallRight = false;
         touchWallLeft = false;
 
@@ -374,6 +376,7 @@ public class PlayerMovement : MonoBehaviour
         currentJumpDuration = jumpDuration;
         minimumJump = minimumJumpHeight;
         wallJump = 0;
+        DoOnlyOnce = false;
         canConnectToWAll = false;
         dashOnlyOnceInAir = true;
         animator.SetBool("Walled", true);

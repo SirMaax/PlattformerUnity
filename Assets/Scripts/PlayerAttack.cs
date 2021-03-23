@@ -57,6 +57,8 @@ public class PlayerAttack : MonoBehaviour
                 swordChecker = swordPointNormal;
             }
             Attacking();
+
+            
         }    
     }
 
@@ -82,4 +84,5 @@ public class PlayerAttack : MonoBehaviour
 
         //Gizmos.DrawWireSphere(swordPointDown.position, detectionCircle);
     }
+   
 }
