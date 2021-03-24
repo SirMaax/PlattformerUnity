@@ -15,7 +15,9 @@ public class PlayerManagment : MonoBehaviour
     private float lastTimeHit = 0f;
     private float health = 50f;
     private List<int> layerList;                //The number stand for the layers the player will be able to recive dmg from
-
+    private bool invincble = false;
+    private Vector2 forceVec;
+    public PlayerMovement player;
     private void Awake()
     {
         layerList = new List<int> { 8 };       //Defines from which layers the player can get hit
@@ -24,18 +26,21 @@ public class PlayerManagment : MonoBehaviour
     private void FixedUpdate()
     {
         CountDownInvincibility();
+        DisableJumpWhenHit();
+
     }
 
-   
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject == null) return;
-       
+        
+        if (invincble ||collision.gameObject == null) return;
+
         GameObject tempObject = collision.gameObject;
         if (layerList.Contains(tempObject.layer))
         {
             Knockback(tempObject);
-
+            invincble = true;
             //Object is in the specific layer
             PlayerIsHit();
         }
@@ -50,6 +55,8 @@ public class PlayerManagment : MonoBehaviour
         lastTimeHit = Time.time;
 
         Physics2D.IgnoreLayerCollision(3, 8, true);
+
+        //Disables force from jumping;
     }
 
     //After beeing hit enables hitboxes again with the Enemy Layer 
@@ -58,15 +65,15 @@ public class PlayerManagment : MonoBehaviour
         if ((Time.time - lastTimeHit) >= invincibilityTime)
         {
             Physics2D.IgnoreLayerCollision(3, 8, false);
-            Debug.Log("Player can be hit again");
-        }
+            invincble = false;    
+        }   
     }
 
     private void Knockback(GameObject tempObject)
     {
         Vector2 enemyVec = tempObject.transform.position;
         Vector2 playerVec = rigidyBody.transform.position;
-        Vector2 forceVec = playerVec - enemyVec;
+         forceVec = playerVec - enemyVec;
 
         forceVec.Normalize();
 
@@ -78,5 +85,12 @@ public class PlayerManagment : MonoBehaviour
         rigidyBody.velocity = Vector2.zero;
 
         rigidyBody.AddForce(forceVec);
+    }
+
+
+    private void DisableJumpWhenHit()
+    {
+        if(invincble)
+        player.currentJumpDuration = player.jumpDuration;
     }
 }

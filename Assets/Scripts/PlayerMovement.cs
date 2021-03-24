@@ -10,7 +10,6 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] float runSpeed = 40f;                   //Controlls RunSpeed for player
     [SerializeField] float jumpHeight = 50f;                //Controls jumpforce
-    [SerializeField] float jumpDuration = 5f;               //The length of the maximum jump
     [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
     [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
     [SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
@@ -37,7 +36,8 @@ public class PlayerMovement : MonoBehaviour
     public bool grounded = true;                            //True when grounded in air false
     public bool airborn = false;                            //When jumping player is airborn
     private float minimumJump = 0f;                         //Counter for minimumJump
-    private float currentJumpDuration = 0f;                 //Length of current Jump
+    public float currentJumpDuration = 0f;                 //Length of current Jump
+    public float jumpDuration = 5f;                         //The length of the maximum jump
 
 
     public bool touchWallLeft = false;                      //IF player is touching wall from the left
@@ -394,4 +394,6 @@ public class PlayerMovement : MonoBehaviour
         wallJump = 0;
         canConnectToWAll = true;
     }
+
+
 }
