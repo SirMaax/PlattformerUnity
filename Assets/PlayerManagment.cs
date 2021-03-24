@@ -9,6 +9,8 @@ public class PlayerManagment : MonoBehaviour
     public Animator animator;
 
     [SerializeField] float invincibilityTime;   //How long the player is invincible
+    [SerializeField] float knockBackFromEnemies;
+    [SerializeField] float knockBackFromEnemiesWhenUnderThem;
 
     private float lastTimeHit = 0f;
     private float health = 50f;
@@ -32,6 +34,8 @@ public class PlayerManagment : MonoBehaviour
         GameObject tempObject = collision.gameObject;
         if (layerList.Contains(tempObject.layer))
         {
+            Knockback(tempObject);
+
             //Object is in the specific layer
             PlayerIsHit();
         }
@@ -56,5 +60,23 @@ public class PlayerManagment : MonoBehaviour
             Physics2D.IgnoreLayerCollision(3, 8, false);
             Debug.Log("Player can be hit again");
         }
+    }
+
+    private void Knockback(GameObject tempObject)
+    {
+        Vector2 enemyVec = tempObject.transform.position;
+        Vector2 playerVec = rigidyBody.transform.position;
+        Vector2 forceVec = playerVec - enemyVec;
+
+        forceVec.Normalize();
+
+        forceVec.x *= knockBackFromEnemies;
+        forceVec.y *= knockBackFromEnemies;
+        forceVec.y /= 2;
+
+        if (rigidyBody.transform.position.y < tempObject.transform.position.y) forceVec.y += knockBackFromEnemiesWhenUnderThem;
+        rigidyBody.velocity = Vector2.zero;
+
+        rigidyBody.AddForce(forceVec);
     }
 }
