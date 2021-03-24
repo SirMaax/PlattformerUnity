@@ -7,8 +7,9 @@ public class PlayerMovement : MonoBehaviour
 {
     public CharacterController2D controller;
     public Rigidbody2D rigidBody;
+    public Animator animator;
 
-    [SerializeField] float runSpeed = 40f;                   //Controlls RunSpeed for player
+    [SerializeField] float runSpeed = 40f;                  //Controls RunSpeed for player
     [SerializeField] float jumpHeight = 50f;                //Controls jumpforce
     [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
     [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
@@ -36,29 +37,28 @@ public class PlayerMovement : MonoBehaviour
     public bool grounded = true;                            //True when grounded in air false
     public bool airborn = false;                            //When jumping player is airborn
     private float minimumJump = 0f;                         //Counter for minimumJump
-    public float currentJumpDuration = 0f;                 //Length of current Jump
+    public float currentJumpDuration = 0f;                  //Length of current Jump
     public float jumpDuration = 5f;                         //The length of the maximum jump
+    [SerializeField] float maxDownSpeed;                    //How fast the player moves down in air when pressing odwn
+    private bool DoOnlyOnce = false;                        //Used for jumpig       -> Should rename that :D
 
 
     public bool touchWallLeft = false;                      //IF player is touching wall from the left
     public bool touchWallRight = false;                     //IF player is touching wall from the right
     public float wallJump = 0f;                             //0 = No touch , 1 = left Wall ,2 = right wall
     public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
+    public bool groundWallJump = false;                     //WHen standing next to a wall and jumping = true
+    [SerializeField] float wallSlideSpeed;                  //How fast the player slides down the wall
+    public bool canConnectToWAll = true;                    //When false the player can not conect to a wall
+    private bool slideDownWall = false;                     //If the player wants to slide down the wall
 
-    public bool groundWallJump = false;
-
-    [SerializeField] float maxDownSpeed = 0f;
-
-    [SerializeField] float wallSlideSpeed;
-    public bool canConnectToWAll = true;
-
+    private float lastYPos;
 
 
-    private bool DoOnlyOnce = false;                  //TEST
 
-    private bool slideDownWall = false;
 
-    public Animator animator;
+
+
     // Update is called once per frame
     void Update()
     {
@@ -80,15 +80,17 @@ public class PlayerMovement : MonoBehaviour
                 dashReady = true;
             }
         }
-        
+
         //Input for Jumping while on wall
-        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight) )
+        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight))
         {
-            if (touchWallLeft) {
-                    wallJump = 1;
+            if (touchWallLeft)
+            {
+                wallJump = 1;
             }
-            else {
-                    wallJump = 2;
+            else
+            {
+                wallJump = 2;
             }
             ResetJumpVar();
         }
@@ -105,11 +107,11 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = jumpDuration;
         }
         //Input for the down Button in the air
-        if ((Input.GetButton("Down") || (vertialMovement < 0) && ( airborn || ( touchWallLeft || touchWallRight)) ))
+        if ((Input.GetButton("Down") || (vertialMovement < 0) && (airborn || (touchWallLeft || touchWallRight))))
         {
             downMovement = true;
         }
-        
+
     }
 
     /// <summary>
@@ -118,6 +120,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        //Checks if the player is Airborn
+        CheckIfAirborn();
+
         //Clamp gravityDownFallSpeed
         ClampGravity();
         //Counts airtime
@@ -125,7 +130,7 @@ public class PlayerMovement : MonoBehaviour
         //Counts intervall between dashes
         dashCounter++;
         //Slide down Wall
-        if (wallJump == 0 && (touchWallLeft ||touchWallRight ))
+        if (wallJump == 0 && (touchWallLeft || touchWallRight))
             rigidBody.velocity = new Vector2(0, wallSlideSpeed);
         //Movement
         controller.Move(horizontalMovement, false, false);
@@ -139,21 +144,18 @@ public class PlayerMovement : MonoBehaviour
         StopJump();
         //TouchingWall Action
         //TouchingWall();
-        //Counts preJumpTiming
 
         //ANIMATION PART
-        if (grounded)
-        {
-            animator.SetBool("JumpingDown", false);
-        }
+       
 
-        
 
-        if(wallJump != 0)
+
+        if (wallJump != 0)
         {
             airborn = true;
             grounded = false;
         }
+        lastYPos = rigidBody.position.y;
     }
 
     //Stops the jump after a certain time
@@ -165,13 +167,13 @@ public class PlayerMovement : MonoBehaviour
             DoOnlyOnce = true;
             StopYAcceleration();
             wallJump = 0;
-            
+
             animator.SetBool("JumpingDown", true);
             animator.SetBool("JumpingUp", false);
         }
     }
 
-    
+
     //DASH Movement regulates the dash
     public void Dash()
     {
@@ -215,7 +217,7 @@ public class PlayerMovement : MonoBehaviour
             }
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
             minimumJump += 0.1f;
-            
+
             if (minimumJump == minimumJumpHeight && wallJump != 0)
             {
                 canConnectToWAll = true;
@@ -223,7 +225,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (!grounded && currentJumpDuration < jumpDuration && minimumJump >= minimumJumpHeight)
-        {        
+        {
             currentJumpDuration++;
             if (wallJump != 0) jumpHeight = wallJumpHeight;
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
@@ -244,11 +246,11 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnLanding()
     {
-        if (!grounded )
+        if (!grounded)
         {
             animator.SetBool("JumpingDown", false);
             animator.SetBool("Walled", false);
-           // weirdGroundWallJump = false;
+            // weirdGroundWallJump = false;
             grounded = true;
             airborn = false;
             downMovement = false;
@@ -262,7 +264,7 @@ public class PlayerMovement : MonoBehaviour
         wallJump = 0;
     }
 
- 
+
     //Stops Y Movement 
     public void StopYAcceleration()
     {
@@ -271,7 +273,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-   
+
 
     //Pogo in air
     public void HitTargetInAir()
@@ -282,9 +284,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void ClampGravity()
     {
-        if(rigidBody.velocity.y <= maxDownSpeed)
+        if (rigidBody.velocity.y <= maxDownSpeed)
         {
-            Vector2 temp = new Vector2(horizontalMovement *10 , maxDownSpeed);
+            Vector2 temp = new Vector2(horizontalMovement * 10, maxDownSpeed);
             rigidBody.velocity = temp;
         }
     }
@@ -298,17 +300,18 @@ public class PlayerMovement : MonoBehaviour
             groundWallJump = false;
         }
         //Used for detecting when standing next to a wall
-        if (grounded)
+        if (grounded && lastYPos == rigidBody.position.y)
         {
+            Debug.Log("HAHA");
             groundWallJump = true;
             return;
         }
-        if (downMovement )
+        if (downMovement)
         {
             slideDownWall = true;
             touchWallRight = false;
             //If slide Down Wall was used before and the player is not pressing down right now. It is set to false
-            if(vertialMovement == 0 && slideDownWall)
+            if (vertialMovement == 0 && slideDownWall)
             {
                 canConnectToWAll = true;
                 slideDownWall = false;
@@ -321,7 +324,7 @@ public class PlayerMovement : MonoBehaviour
         if (!groundWallJump)
         {
 
-            if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement && currentJumpDuration > 3)
+            if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement && (currentJumpDuration > 3 || !groundWallJump))
             {
                 touchWallRight = true;
                 ResetWallVar();
@@ -341,11 +344,13 @@ public class PlayerMovement : MonoBehaviour
             groundWallJump = false;
         }
         //Used for detecting when standing next to a wall
-        if (grounded)
+        if (grounded && lastYPos == rigidBody.position.y)
         {
             groundWallJump = true;
             return;
         }
+
+
         //Used for sliding down the wall
         if (downMovement)
         {
@@ -364,7 +369,7 @@ public class PlayerMovement : MonoBehaviour
         //Connects the player to the wall
         if (!groundWallJump)
         {
-            if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll && currentJumpDuration > 3)
+            if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll && (currentJumpDuration > 3 || !groundWallJump))
             {
                 touchWallLeft = true;
                 ResetWallVar();
@@ -389,7 +394,7 @@ public class PlayerMovement : MonoBehaviour
         currentJumpDuration = 0;
         minimumJump = 0;
         jumpHeight = 115;
-        
+
     }
     //USED for when touching wall
     private void ResetWallVar()
@@ -428,5 +433,21 @@ public class PlayerMovement : MonoBehaviour
         groundWallJump = false;
         dashReady = false;
         dashCounter = 0;
+    }
+
+    private void CheckIfAirborn()
+    {
+        float temp = rigidBody.position.y;
+
+        if (lastYPos > temp)
+        {
+            Debug.Log("Set to true");
+            animator.SetBool("JumpingDown", true);
+        }
+        //lastYPos = temp;
+        else if (grounded)
+        {
+            animator.SetBool("JumpingDown", false);
+        }
     }
 }
