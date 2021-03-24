@@ -547,7 +547,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 215338382}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20.48, y: 9.84, z: 0}
+  m_LocalPosition: {x: 30.74, y: 8.14, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -675,11 +675,11 @@ GameObject:
   - component: {fileID: 251582800}
   - component: {fileID: 251582803}
   - component: {fileID: 251582806}
+  - component: {fileID: 251582807}
   - component: {fileID: 251582801}
   - component: {fileID: 251582798}
   - component: {fileID: 251582805}
   - component: {fileID: 251582802}
-  - component: {fileID: 251582807}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -746,7 +746,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 251582797}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 14, y: 3.41, z: 0}
+  m_LocalPosition: {x: 26.62, y: 14.95, z: 0}
   m_LocalScale: {x: 7.0151906, y: 7.0151906, z: 7.0151906}
   m_Children:
   - {fileID: 267818359}
@@ -912,9 +912,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 251582800}
   rigidBody: {fileID: 251582801}
+  animator: {fileID: 251582802}
   runSpeed: 1.25
   jumpHeight: 115
-  jumpDuration: 8.5
   downMovementForce: 15
   minimumJumpHeight: 0.4
   jumpHeightRecument: 1.5
@@ -927,15 +927,16 @@ MonoBehaviour:
   pogoHeight: 1000
   grounded: 1
   airborn: 0
+  currentJumpDuration: 0
+  jumpDuration: 8.5
+  maxDownSpeed: -20
   touchWallLeft: 0
   touchWallRight: 0
   wallJump: 0
   lastPositionOnWall: {x: 0, y: 0}
-  weirdGroundWallJump: 0
-  maxDownSpeed: -20
+  groundWallJump: 0
   wallSlideSpeed: 0
   canConnectToWAll: 1
-  animator: {fileID: 251582802}
 --- !u!61 &251582805
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -984,7 +985,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 251582797}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d80c24c837d49443b96f1ffb53ddc22, type: 3}
+  m_Script: {fileID: 11500000, guid: eae2e470c1e6a98409e20c4cd4ac456a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   rigidyBody: {fileID: 251582801}
@@ -993,6 +994,7 @@ MonoBehaviour:
   invincibilityTime: 1
   knockBackFromEnemies: 1350
   knockBackFromEnemiesWhenUnderThem: 1150
+  player: {fileID: 251582804}
 --- !u!1 &267818358
 GameObject:
   m_ObjectHideFlags: 0
@@ -1244,7 +1246,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 7.911175, y: -1.5463645, z: -8.992003}
+  m_LocalPosition: {x: 20.531176, y: 9.993635, z: -8.992003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 170140337}
@@ -1310,7 +1312,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 596812605}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 7.911175, y: -1.5463645, z: -8.992003}
+  m_LocalPosition: {x: 20.531176, y: 9.993635, z: -8.992003}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1216813261}
@@ -2154,7 +2156,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1395093718}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 6.28, y: 6.03, z: 0}
+  m_LocalPosition: {x: 10.94, y: 11.95, z: 0}
   m_LocalScale: {x: 1.1310472, y: 3.4008923, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2408,7 +2410,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1507958231}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.3, y: 9.72, z: 0}
+  m_LocalPosition: {x: -0.54, y: 8.65, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
