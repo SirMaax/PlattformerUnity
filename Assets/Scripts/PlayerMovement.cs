@@ -53,7 +53,7 @@ public class PlayerMovement : MonoBehaviour
     private bool slideDownWall = false;                     //If the player wants to slide down the wall
 
     private float lastYPos;
-
+    private bool wallTouchMethodExecuted = false;
 
 
 
@@ -111,7 +111,15 @@ public class PlayerMovement : MonoBehaviour
         {
             downMovement = true;
         }
-
+        
+        //Order is important 
+        if (!wallTouchMethodExecuted && (touchWallRight || touchWallLeft))
+        {
+            touchWallLeft = false;
+            touchWallRight = false;
+            animator.SetBool("JumpingDown", true);
+            animator.SetBool("Walled", false);
+        }
     }
 
     /// <summary>
@@ -120,6 +128,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        wallTouchMethodExecuted = false;
+        
+        
         //Checks if the player is Airborn
         CheckIfAirborn();
 
@@ -294,6 +305,7 @@ public class PlayerMovement : MonoBehaviour
     //Is triggered when the wall is right from the player
     public void OnWallTouchRightEvent()
     {
+        wallTouchMethodExecuted = true;
         //Connects to wall when jumping next to a wall and pressing the button in the right direction
         if (groundWallJump && horizontalMovement > 0)
         {
@@ -338,6 +350,7 @@ public class PlayerMovement : MonoBehaviour
     //Is triggered when the wall is left from the player
     public void OnWallTouchLeftEvent()
     {
+        wallTouchMethodExecuted = true;
         //Connects to wall when jumping next to a wall and pressing the button in the right direction
         if (groundWallJump && horizontalMovement < 0)
         {
@@ -435,16 +448,15 @@ public class PlayerMovement : MonoBehaviour
         dashCounter = 0;
     }
 
+    
     private void CheckIfAirborn()
     {
         float temp = rigidBody.position.y;
 
         if (lastYPos > temp)
         {
-            Debug.Log("Set to true");
             animator.SetBool("JumpingDown", true);
         }
-        //lastYPos = temp;
         else if (grounded)
         {
             animator.SetBool("JumpingDown", false);
