@@ -44,7 +44,8 @@ public class PlayerMovement : MonoBehaviour
     public bool touchWallRight = false;                     //IF player is touching wall from the right
     public float wallJump = 0f;                             //0 = No touch , 1 = left Wall ,2 = right wall
     public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
-    public bool weirdGroundWallJump = false;                //When starting a jump next to a wall
+
+    public bool groundWallJump = false;
 
     [SerializeField] float maxDownSpeed = 0f;
 
@@ -89,7 +90,6 @@ public class PlayerMovement : MonoBehaviour
             else {
                     wallJump = 2;
             }
-            Debug.Log(wallJump);
             ResetJumpVar();
         }
         //Input for Jumping while grounded
@@ -165,14 +165,9 @@ public class PlayerMovement : MonoBehaviour
             DoOnlyOnce = true;
             StopYAcceleration();
             wallJump = 0;
-            if(wallJump != 0)
-            {
-                touchWallLeft = false;
-                touchWallRight = false;
-            }
+            
             animator.SetBool("JumpingDown", true);
             animator.SetBool("JumpingUp", false);
-
         }
     }
 
@@ -189,13 +184,10 @@ public class PlayerMovement : MonoBehaviour
                 //Animation
                 animator.SetBool("Walled", false);
 
-                if (airborn)
-                {
-                    dashOnlyOnceInAir = false;
-                    rigidBody.velocity = Vector2.zero;
-                }
-                dashReady = false;
-                dashCounter = 0;
+                //Var that are reset upon dashing
+                ResetDashVar();
+
+                //Apply force
                 rigidBody.AddForce(new Vector2(lastHorizontMovement * (dashForce - (System.Math.Abs(horizontalMovement) * dashMultiply)), 0));
             }
         }
@@ -235,7 +227,6 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration++;
             if (wallJump != 0) jumpHeight = wallJumpHeight;
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
-            
             minimumJump++;
             //jumpHeight -= jumpHeightRecument;
         }
@@ -246,7 +237,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (downMovement && airborn)
         {
-            Debug.Log("DOWN Movement");
             rigidBody.AddForce(new Vector2(0, -downMovementForce));
             animator.SetBool("JumpingUp", false);
             animator.SetBool("JumpingDown", true);
@@ -298,9 +288,21 @@ public class PlayerMovement : MonoBehaviour
             rigidBody.velocity = temp;
         }
     }
+
     //Is triggered when the wall is right from the player
     public void OnWallTouchRightEvent()
     {
+        //Connects to wall when jumping next to a wall and pressing the button in the right direction
+        if (groundWallJump && horizontalMovement > 0)
+        {
+            groundWallJump = false;
+        }
+        //Used for detecting when standing next to a wall
+        if (grounded)
+        {
+            groundWallJump = true;
+            return;
+        }
         if (downMovement )
         {
             slideDownWall = true;
@@ -315,20 +317,36 @@ public class PlayerMovement : MonoBehaviour
             }
             return;
         }
-        if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement )
+        //Connects the player to the wall
+        if (!groundWallJump)
         {
-            touchWallRight = true;
-            
-            ResetWallVar();
-        }
-        else if(horizontalMovement < 0) // LEAVING WALL
-        {
-            LeavingWallVar();
+
+            if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement && currentJumpDuration > 3)
+            {
+                touchWallRight = true;
+                ResetWallVar();
+            }
+            else if (horizontalMovement < 0) // LEAVING WALL
+            {
+                LeavingWallVar();
+            }
         }
     }
     //Is triggered when the wall is left from the player
     public void OnWallTouchLeftEvent()
     {
+        //Connects to wall when jumping next to a wall and pressing the button in the right direction
+        if (groundWallJump && horizontalMovement < 0)
+        {
+            groundWallJump = false;
+        }
+        //Used for detecting when standing next to a wall
+        if (grounded)
+        {
+            groundWallJump = true;
+            return;
+        }
+        //Used for sliding down the wall
         if (downMovement)
         {
             slideDownWall = true;
@@ -343,15 +361,18 @@ public class PlayerMovement : MonoBehaviour
             }
             return;
         }
-            if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll)
+        //Connects the player to the wall
+        if (!groundWallJump)
         {
-            touchWallLeft = true;
-            Debug.Log("SET TO FALSE DO ONLY ONCE");
-            ResetWallVar();
-        }
-        else if (horizontalMovement > 0) // LEAVING WALL
-        {
-            LeavingWallVar();
+            if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll && currentJumpDuration > 3)
+            {
+                touchWallLeft = true;
+                ResetWallVar();
+            }
+            else if (horizontalMovement > 0) // LEAVING WALL
+            {
+                LeavingWallVar();
+            }
         }
     }
 
@@ -368,6 +389,7 @@ public class PlayerMovement : MonoBehaviour
         currentJumpDuration = 0;
         minimumJump = 0;
         jumpHeight = 115;
+        
     }
     //USED for when touching wall
     private void ResetWallVar()
@@ -395,5 +417,16 @@ public class PlayerMovement : MonoBehaviour
         canConnectToWAll = true;
     }
 
+    private void ResetDashVar()
+    {
+        if (airborn)
+        {
+            dashOnlyOnceInAir = false;
+            rigidBody.velocity = Vector2.zero;
+        }
 
+        groundWallJump = false;
+        dashReady = false;
+        dashCounter = 0;
+    }
 }
