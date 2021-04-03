@@ -10,7 +10,7 @@ public class PlayerMovement : MonoBehaviour
     public Animator animator;
 
     [SerializeField] float runSpeed = 40f;                  //Controls RunSpeed for player
-    [SerializeField] float jumpHeight = 50f;                //Controls jumpforce
+    [SerializeField] float jumpHeight = 0f;                //Controls jumpforce
     [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
     [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
     [SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpDuration = 5f;                         //The length of the maximum jump
     [SerializeField] float maxDownSpeed;                    //How fast the player moves down in air when pressing odwn
     private bool DoOnlyOnce = false;                        //Used for jumpig       -> Should rename that :D
-
+    private float realJumpHeight;
 
     public bool touchWallLeft = false;                      //IF player is touching wall from the left
     public bool touchWallRight = false;                     //IF player is touching wall from the right
@@ -55,7 +55,10 @@ public class PlayerMovement : MonoBehaviour
     private float lastYPos;
     private bool wallTouchMethodExecuted = false;
 
-
+    private void Start()
+    {
+        realJumpHeight = jumpHeight;
+    }
 
 
 
@@ -209,7 +212,7 @@ public class PlayerMovement : MonoBehaviour
     //Makes the player jump the minimum JumpHeight
     public void Jump()
     {
-        jumpHeight = 115;
+        jumpHeight = realJumpHeight;
         float temp = 0;
         if (minimumJump < minimumJumpHeight)
         {
@@ -238,7 +241,11 @@ public class PlayerMovement : MonoBehaviour
         if (!grounded && currentJumpDuration < jumpDuration && minimumJump >= minimumJumpHeight)
         {
             currentJumpDuration++;
-            if (wallJump != 0) jumpHeight = wallJumpHeight;
+            if (wallJump != 0)
+            {
+                jumpHeight = wallJumpHeight;
+                animator.SetBool("Walled", false);
+            }
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
             minimumJump++;
             //jumpHeight -= jumpHeightRecument;
@@ -406,7 +413,7 @@ public class PlayerMovement : MonoBehaviour
 
         currentJumpDuration = 0;
         minimumJump = 0;
-        jumpHeight = 115;
+        jumpHeight = realJumpHeight;
 
     }
     //USED for when touching wall

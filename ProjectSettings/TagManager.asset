@@ -14,7 +14,7 @@ TagManager:
   - PositionChecker
   - Objects
   - Enemies
-  - 
+  - CameraBounds
   - 
   - 
   - 
