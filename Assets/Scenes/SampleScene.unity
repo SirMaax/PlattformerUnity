@@ -276,7 +276,7 @@ MonoBehaviour:
   manualDebugFloorRoof: 0
   showSearchTree: 0
   unwalkableNodeDebugSize: 0.3
-  logPathResults: 1
+  logPathResults: 0
   maxNearestNodeDistance: 100
   scanOnStartup: 1
   fullGetNearestSearch: 0
@@ -295,7 +295,7 @@ MonoBehaviour:
   heuristic: 2
   heuristicScale: 1
   threadCount: 1
-  maxFrameTime: 1
+  maxFrameTime: 10
   batchGraphUpdates: 0
   graphUpdateBatchingInterval: 0.2
   euclideanEmbedding:
@@ -303,7 +303,7 @@ MonoBehaviour:
     seed: 0
     pivotPointRoot: {fileID: 0}
     spreadOutCount: 1
-  showGraphs: 1
+  showGraphs: 0
 --- !u!4 &25275178
 Transform:
   m_ObjectHideFlags: 0
@@ -328,16 +328,16 @@ GameObject:
   m_Component:
   - component: {fileID: 76735344}
   - component: {fileID: 76735343}
+  - component: {fileID: 76735339}
   - component: {fileID: 76735341}
   - component: {fileID: 76735340}
-  - component: {fileID: 76735339}
   m_Layer: 0
   m_Name: Enemy (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &76735339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,7 +350,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5f755941eaa5784fbb3828e38f54cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  detectionCircle: 10
   target: {fileID: 251582799}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 8
   speed: 400
   nextWayPointDistance: 3
 --- !u!50 &76735340
