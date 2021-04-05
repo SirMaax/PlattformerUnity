@@ -321,7 +321,6 @@ public class PlayerMovement : MonoBehaviour
         //Used for detecting when standing next to a wall
         if (grounded && lastYPos == rigidBody.position.y)
         {
-            Debug.Log("HAHA");
             groundWallJump = true;
             return;
         }
