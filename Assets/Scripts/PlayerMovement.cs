@@ -53,10 +53,11 @@ public class PlayerMovement : MonoBehaviour
     private bool slideDownWall = false;                     //If the player wants to slide down the wall
 
     private float lastYPos;
-    private bool wallTouchMethodExecuted = false;
-    public float coyoteWallTime = 0f;
-    public float coyoteWallStartTime = 2f;
-    public float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
+    private bool wallTouchMethodExecuted = false;           
+    private float coyoteWallTime = 0f;                       //Counts down CooyteWallTime
+    private float coyoteWallStartTime = 2f;                  //How long the player has time to press the button after leaving the wall and still beeing able to jump
+    private float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
+
 
     private void Start()
     {
@@ -273,31 +274,28 @@ public class PlayerMovement : MonoBehaviour
         {
             animator.SetBool("JumpingDown", false);
             animator.SetBool("Walled", false);
-            // weirdGroundWallJump = false;
             grounded = true;
             airborn = false;
             downMovement = false;
             dashOnlyOnceInAir = true;
             if (touchWallLeft) transform.position = new Vector2(rigidBody.position.x + moveFromWallAway, rigidBody.position.y);
             else if (touchWallRight) transform.position = new Vector2(rigidBody.position.x - moveFromWallAway, rigidBody.position.y);
-            currentJumpDuration = 0;                //GERADE HINZUGEFÜGT
+            currentJumpDuration = 0;                
             canConnectToWAll = true;
             DoOnlyOnce = false;
             lastWallTouched = 0f;
+            touchWallLeft = false;
+            touchWallRight = false;
         }
         wallJump = 0;
     }
-
 
     //Stops Y Movement 
     public void StopYAcceleration()
     {
         if (minimumJump > minimumJumpHeight)
             rigidBody.AddForce(new Vector2(0, -downMovementForce));
-
     }
-
-
 
     //Pogo in air
     public void HitTargetInAir()
@@ -325,9 +323,10 @@ public class PlayerMovement : MonoBehaviour
             groundWallJump = false;
         }
         //Used for detecting when standing next to a wall
-        if (grounded && lastYPos == rigidBody.position.y)
+        if (grounded)
         {
             groundWallJump = true;
+            touchWallRight = false;
             return;
         }
         if (downMovement)
@@ -369,9 +368,10 @@ public class PlayerMovement : MonoBehaviour
             groundWallJump = false;
         }
         //Used for detecting when standing next to a wall
-        if (grounded && lastYPos == rigidBody.position.y)
+        if (grounded)
         {
             groundWallJump = true;
+            touchWallLeft = false;
             return;
         }
 
