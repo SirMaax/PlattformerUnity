@@ -54,6 +54,9 @@ public class PlayerMovement : MonoBehaviour
 
     private float lastYPos;
     private bool wallTouchMethodExecuted = false;
+    public float coyoteWallTime = 0f;
+    public float coyoteWallStartTime = 2f;
+    public float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
 
     private void Start()
     {
@@ -85,7 +88,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         //Input for Jumping while on wall
-        if (Input.GetButtonDown("Jump") && (touchWallLeft || touchWallRight))
+        if (Input.GetButtonDown("Jump") && ((touchWallLeft || touchWallRight) || coyoteWallTime != 0))
         {
             if (touchWallLeft)
             {
@@ -132,10 +135,12 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         wallTouchMethodExecuted = false;
-        
-        
-        //Checks if the player is Airborn
-        CheckIfAirborn();
+        //Count down coyoteWallTime
+           
+        if(coyoteWallTime != 0) coyoteWallTime--;
+
+            //Checks if the player is Airborn
+            CheckIfAirborn();
 
         //Clamp gravityDownFallSpeed
         ClampGravity();
@@ -217,13 +222,13 @@ public class PlayerMovement : MonoBehaviour
         if (minimumJump < minimumJumpHeight)
         {
             downMovement = false;
-            if (wallJump == 1)
+            if (wallJump == 1 || lastWallTouched  == 1)
             {
                 temp = distanceWallJumpX;
                 jumpHeight = wallJumpHeight;
                 animator.SetBool("JumpingUp", true);
             }
-            else if (wallJump == 2)
+            else if (wallJump == 2 || lastWallTouched == 2)
             {
                 temp = -distanceWallJumpX;
                 jumpHeight = wallJumpHeight;
@@ -241,7 +246,7 @@ public class PlayerMovement : MonoBehaviour
         if (!grounded && currentJumpDuration < jumpDuration && minimumJump >= minimumJumpHeight)
         {
             currentJumpDuration++;
-            if (wallJump != 0)
+            if (wallJump != 0 || coyoteWallTime != 0)
             {
                 jumpHeight = wallJumpHeight;
                 animator.SetBool("Walled", false);
@@ -278,6 +283,7 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = 0;                //GERADE HINZUGEFÜGT
             canConnectToWAll = true;
             DoOnlyOnce = false;
+            lastWallTouched = 0f;
         }
         wallJump = 0;
     }
@@ -341,7 +347,7 @@ public class PlayerMovement : MonoBehaviour
         //Connects the player to the wall
         if (!groundWallJump)
         {
-
+            lastWallTouched = 2;
             if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement && (currentJumpDuration > 3 || !groundWallJump))
             {
                 touchWallRight = true;
@@ -388,6 +394,7 @@ public class PlayerMovement : MonoBehaviour
         //Connects the player to the wall
         if (!groundWallJump)
         {
+            lastWallTouched = 1;
             if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll && (currentJumpDuration > 3 || !groundWallJump))
             {
                 touchWallLeft = true;
@@ -439,6 +446,7 @@ public class PlayerMovement : MonoBehaviour
         //Resetting WallJump for new jump
         wallJump = 0;
         canConnectToWAll = true;
+        coyoteWallTime = coyoteWallStartTime;
     }
 
     private void ResetDashVar()
