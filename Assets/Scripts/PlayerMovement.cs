@@ -58,8 +58,10 @@ public class PlayerMovement : MonoBehaviour
     private float coyoteWallStartTime = 2f;                  //How long the player has time to press the button after leaving the wall and still beeing able to jump
     private float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
 
-    private bool doubleJumpedAlready = false;
-    [SerializeField] float doubleJumpIncreasment;
+    public bool doubleJumpedAlready = false;               //Used for switching jump Animation 
+    [SerializeField] float doubleJumpIncreasment;           //Regulates ´how high the player can jump with double Jums
+    public bool fallingFromPlattform = false;
+
     private void Start()
     {
         realJumpHeight = jumpHeight;
@@ -68,6 +70,8 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+
         //Tells in which direction the player is facing
         if (horizontalMovement < 0) lastHorizontMovement = -1;
         if (horizontalMovement > 0) lastHorizontMovement = 1;
@@ -87,16 +91,6 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        //Double Jump
-        if(!doubleJumpedAlready && Input.GetButtonDown("Jump") && airborn && !touchWallLeft && !touchWallRight)
-        {
-            doubleJumpedAlready = true;
-            minimumJump = minimumJumpHeight;
-            currentJumpDuration = 0;
-
-            rigidBody.velocity = new Vector2 ( rigidBody.velocity.x, 0);
-
-        }
 
         //Input for Jumping while on wall
         if (Input.GetButtonDown("Jump") && ((touchWallLeft || touchWallRight) || coyoteWallTime != 0))
@@ -111,6 +105,22 @@ public class PlayerMovement : MonoBehaviour
             }
             ResetJumpVar();
         }
+        
+        //Double Jump
+        if(!doubleJumpedAlready && !grounded && Input.GetButtonDown("Jump") && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
+        {
+            doubleJumpedAlready = true;
+            minimumJump = minimumJumpHeight;
+            currentJumpDuration = 0;
+            DoOnlyOnce = false;
+            rigidBody.velocity = new Vector2 ( rigidBody.velocity.x, 0);
+
+            animator.SetBool("JumpingUp", true);
+            animator.SetBool("JumpingDown", false);
+
+            Debug.Log("Double Jump used");
+        }
+
         //Input for Jumping while grounded
         else if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0)
         {
@@ -128,7 +138,6 @@ public class PlayerMovement : MonoBehaviour
         {
             downMovement = true;
         }
-        
         //Order is important 
         if (!wallTouchMethodExecuted && (touchWallRight || touchWallLeft))
         {
@@ -150,13 +159,11 @@ public class PlayerMovement : MonoBehaviour
            
         if(coyoteWallTime != 0) coyoteWallTime--;
 
-            //Checks if the player is Airborn
-            CheckIfAirborn();
-
+        //Checks if the player is Airborn
+        CheckIfAirborn();
         //Clamp gravityDownFallSpeed
         ClampGravity();
         //Counts airtime
-        // if (airborn) currentJumpDuration++;
         //Counts intervall between dashes
         dashCounter++;
         //Slide down Wall
@@ -228,6 +235,8 @@ public class PlayerMovement : MonoBehaviour
     //Makes the player jump the minimum JumpHeight
     public void Jump()
     {
+        if (fallingFromPlattform) return;
+            
         jumpHeight = realJumpHeight;
         float temp = 0;
         if (minimumJump < minimumJumpHeight)
@@ -300,6 +309,8 @@ public class PlayerMovement : MonoBehaviour
             lastWallTouched = 0f;
             touchWallLeft = false;
             touchWallRight = false;
+            fallingFromPlattform = false;
+            doubleJumpedAlready = false;
         }
         wallJump = 0;
     }
@@ -428,11 +439,12 @@ public class PlayerMovement : MonoBehaviour
         DoOnlyOnce = false;
         touchWallRight = false;
         touchWallLeft = false;
-        doubleJumpedAlready = false;
+        //doubleJumpedAlready = false;
+        fallingFromPlattform = false;
 
         airborn = true;
         grounded = false;
-
+        
         currentJumpDuration = 0;
         minimumJump = 0;
         jumpHeight = realJumpHeight;
@@ -448,11 +460,13 @@ public class PlayerMovement : MonoBehaviour
         canConnectToWAll = false;
         dashOnlyOnceInAir = true;
         doubleJumpedAlready = false;
+        fallingFromPlattform = false;
         animator.SetBool("Walled", true);
         animator.SetBool("JumpingDown", false);
         animator.SetBool("JumpingUp", false);
     }
 
+    //Leaving wall
     private void LeavingWallVar()
     {
         touchWallLeft = false;
@@ -487,13 +501,14 @@ public class PlayerMovement : MonoBehaviour
         if (lastYPos > temp)
         {
             animator.SetBool("JumpingDown", true);
+            if (grounded) fallingFromPlattform = true;
         }
         else if (grounded)
         {
             animator.SetBool("JumpingDown", false);
+            if (lastYPos == temp) fallingFromPlattform = false;
         }
     }
-
 
 
 }
