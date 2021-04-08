@@ -105,9 +105,8 @@ public class PlayerMovement : MonoBehaviour
             }
             ResetJumpVar();
         }
-        
         //Double Jump
-        if(!doubleJumpedAlready && !grounded && Input.GetButtonDown("Jump") && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
+        else if(!doubleJumpedAlready && !grounded && Input.GetButtonDown("Jump") && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
         {
             doubleJumpedAlready = true;
             minimumJump = minimumJumpHeight;
@@ -348,7 +347,7 @@ public class PlayerMovement : MonoBehaviour
             groundWallJump = false;
         }
         //Used for detecting when standing next to a wall
-        if (grounded)
+        if (grounded && !fallingFromPlattform)
         {
             groundWallJump = true;
             touchWallRight = false;
@@ -393,7 +392,7 @@ public class PlayerMovement : MonoBehaviour
             groundWallJump = false;
         }
         //Used for detecting when standing next to a wall
-        if (grounded)
+        if (grounded && !fallingFromPlattform)
         {
             groundWallJump = true;
             touchWallLeft = false;
