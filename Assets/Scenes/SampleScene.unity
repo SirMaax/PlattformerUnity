@@ -706,6 +706,7 @@ MonoBehaviour:
   rigidBody: {fileID: 215338384}
   player: {fileID: 0}
   collider: {fileID: 0}
+  enemyAiScript: {fileID: 0}
 --- !u!212 &215338386
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1709,15 +1710,16 @@ GameObject:
   m_Component:
   - component: {fileID: 852116467}
   - component: {fileID: 852116463}
+  - component: {fileID: 852116466}
   - component: {fileID: 852116465}
   - component: {fileID: 852116464}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Enemy (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &852116463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1785,6 +1787,22 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.5772972, y: 1.0780134}
   m_EdgeRadius: 0
+--- !u!114 &852116466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 852116462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d49a8edac6f4484eb42376fb738afe0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidBody: {fileID: 852116464}
+  player: {fileID: 251582804}
+  collider: {fileID: 852116465}
+  enemyAiScript: {fileID: 852116463}
 --- !u!4 &852116467
 Transform:
   m_ObjectHideFlags: 0
@@ -3700,6 +3718,7 @@ MonoBehaviour:
   rigidBody: {fileID: 0}
   player: {fileID: 0}
   collider: {fileID: 0}
+  enemyAiScript: {fileID: 0}
 --- !u!212 &1987508711
 SpriteRenderer:
   m_ObjectHideFlags: 0

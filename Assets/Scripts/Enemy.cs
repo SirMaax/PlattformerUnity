@@ -7,10 +7,10 @@ public class Enemy : MonoBehaviour
 
     public Rigidbody2D rigidBody;
     public PlayerMovement player;
-    public PolygonCollider2D collider;
-
+    public Collider2D collider;
+    public EnemyAiGrounded enemyAiScript;
+    
     private float health =30f;
-    private bool died = false;                  //This Enemy can only die once
 
     // Update is called once per frame
     void Update()
@@ -30,13 +30,11 @@ public class Enemy : MonoBehaviour
     //This object dies
     private void Die()
     {
-        if(!died)
-        collider.enabled = false;
-        died = true;
+            enemyAiScript.enabled = false;
+        rigidBody.velocity = Vector2.zero;  
+            rigidBody.isKinematic = true;
+            collider.enabled = false;
+            this.enabled = false;
     }
 
-    private void RunTowardsPlayer()
-    {
-        
-    }
 }
