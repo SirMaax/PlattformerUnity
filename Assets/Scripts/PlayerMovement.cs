@@ -58,13 +58,12 @@ public class PlayerMovement : MonoBehaviour
     private float coyoteWallStartTime = 2f;                  //How long the player has time to press the button after leaving the wall and still beeing able to jump
     private float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
 
-
+    private bool doubleJumpedAlready = false;
+    [SerializeField] float doubleJumpIncreasment;
     private void Start()
     {
         realJumpHeight = jumpHeight;
     }
-
-
 
     // Update is called once per frame
     void Update()
@@ -86,6 +85,17 @@ public class PlayerMovement : MonoBehaviour
             {
                 dashReady = true;
             }
+        }
+
+        //Double Jump
+        if(!doubleJumpedAlready && Input.GetButtonDown("Jump") && airborn && !touchWallLeft && !touchWallRight)
+        {
+            doubleJumpedAlready = true;
+            minimumJump = minimumJumpHeight;
+            currentJumpDuration = 0;
+
+            rigidBody.velocity = new Vector2 ( rigidBody.velocity.x, 0);
+
         }
 
         //Input for Jumping while on wall
@@ -252,6 +262,10 @@ public class PlayerMovement : MonoBehaviour
                 jumpHeight = wallJumpHeight;
                 animator.SetBool("Walled", false);
             }
+            if (doubleJumpedAlready)
+            {
+                jumpHeight *= doubleJumpIncreasment;
+            }
             rigidBody.AddForce(new Vector2(temp, jumpHeight));
             minimumJump++;
             //jumpHeight -= jumpHeightRecument;
@@ -407,12 +421,14 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    //Used before jumping
     private void ResetJumpVar()
     {
         animator.SetBool("JumpingUp", true);
         DoOnlyOnce = false;
         touchWallRight = false;
         touchWallLeft = false;
+        doubleJumpedAlready = false;
 
         airborn = true;
         grounded = false;
@@ -431,6 +447,7 @@ public class PlayerMovement : MonoBehaviour
         DoOnlyOnce = false;
         canConnectToWAll = false;
         dashOnlyOnceInAir = true;
+        doubleJumpedAlready = false;
         animator.SetBool("Walled", true);
         animator.SetBool("JumpingDown", false);
         animator.SetBool("JumpingUp", false);
@@ -476,4 +493,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("JumpingDown", false);
         }
     }
+
+
+
 }
