@@ -12,8 +12,17 @@ public class PlayerManagment : MonoBehaviour
     [SerializeField] float knockBackFromEnemies;
     [SerializeField] float knockBackFromEnemiesWhenUnderThem;
 
+    public GameObject Health5;
+    public GameObject Health4;
+    public GameObject Health3;
+    public GameObject Health2;
+    public GameObject Health1;
+    public GameObject Health0;
+    private GameObject[] sprites;
+
+    private GameObject currentHealthSprite;
     private float lastTimeHit = 0f;
-    private float health = 50f;
+    private float health = 5f;
     private List<int> layerList;                //The number stand for the layers the player will be able to recive dmg from
     private bool invincble = false;
     private Vector2 forceVec;
@@ -21,8 +30,12 @@ public class PlayerManagment : MonoBehaviour
     private void Awake()
     {
         layerList = new List<int> { 8 };       //Defines from which layers the player can get hit
+        sprites = new GameObject[] { Health0, Health1, Health2, Health3, Health4, Health5 };
+        currentHealthSprite = Health5;
+        Health5.GetComponent<SpriteRenderer>().enabled = true;
     }
 
+    
     private void FixedUpdate()
     {
         CountDownInvincibility();
@@ -51,12 +64,11 @@ public class PlayerManagment : MonoBehaviour
     {
         animator.SetTrigger("PlayerHit");
 
-        health -= 10;
+        health -= 1;
         lastTimeHit = Time.time;
 
         Physics2D.IgnoreLayerCollision(3, 8, true);
-
-        //Disables force from jumping;
+        UpdateHealth();
     }
 
     //After beeing hit enables hitboxes again with the Enemy Layer 
@@ -92,5 +104,15 @@ public class PlayerManagment : MonoBehaviour
     {
         if(invincble)
         player.currentJumpDuration = player.jumpDuration;
+    }
+
+    //Disables old HealthSprite and enables new one;
+    private void UpdateHealth()
+    {
+        if (health >= 0) { 
+        currentHealthSprite.GetComponent<SpriteRenderer>().enabled = false;
+        currentHealthSprite = sprites[(int)health];
+        currentHealthSprite.GetComponent<SpriteRenderer>().enabled = true;
+        }
     }
 }

@@ -117,7 +117,6 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("JumpingUp", true);
             animator.SetBool("JumpingDown", false);
 
-            Debug.Log("Double Jump used");
         }
 
         //Input for Jumping while grounded
