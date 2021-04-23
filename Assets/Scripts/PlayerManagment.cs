@@ -34,8 +34,15 @@ public class PlayerManagment : MonoBehaviour
         currentHealthSprite = Health5;
         Health5.GetComponent<SpriteRenderer>().enabled = true;
     }
+    private void Update()
+    {
+        if (Input.GetButtonDown("HealingTest"))
+        {
+            Healing();
+            UpdateHealth();
+        }
+    }
 
-    
     private void FixedUpdate()
     {
         CountDownInvincibility();
@@ -114,5 +121,10 @@ public class PlayerManagment : MonoBehaviour
         currentHealthSprite = sprites[(int)health];
         currentHealthSprite.GetComponent<SpriteRenderer>().enabled = true;
         }
+    }
+
+    private void Healing()
+    {
+        if (health < 5) health++;
     }
 }
