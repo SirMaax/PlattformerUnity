@@ -50,3 +50,6 @@ TagManager:
   - name: Player
     uniqueID: 2892576717
     locked: 0
+  - name: LightHasNoEffect
+    uniqueID: 2537387823
+    locked: 0
