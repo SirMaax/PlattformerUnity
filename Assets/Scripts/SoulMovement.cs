@@ -11,9 +11,13 @@ public class SoulMovement : MonoBehaviour
     [SerializeField] float linearDrag;
     public Rigidbody2D rb;
     public Animator animator;
+    public Particle_Soul particleFly;
+    public ParticleSystem particleStand;
 
+    public float angle;
     private float horizontalMovement = 0f;
     private float vertialMovement = 0f;
+    private bool toggleParticlesOnce = false;
     // Update is called once per frame
     void Update()
     {
@@ -45,6 +49,12 @@ public class SoulMovement : MonoBehaviour
 
         if (horizontalMovement != 0 || vertialMovement != 0)
         {
+            if (toggleParticlesOnce)
+            {
+                toggleParticlesOnce = false;
+                particleFly.ToggleParticlesFly();
+            }
+            
             Vector2 directionPoint = new Vector2(rb.position.x + horizontalMovement, rb.position.y + vertialMovement);
 
             Vector2 direction = directionPoint - rb.position;
@@ -63,12 +73,26 @@ public class SoulMovement : MonoBehaviour
 
         
 
-        var angle = Mathf.Atan2(pointA.y - pointB.y, pointA.x - pointB.x) * Mathf.Rad2Deg;
+        angle = Mathf.Atan2(pointA.y - pointB.y, pointA.x - pointB.x) * Mathf.Rad2Deg;
         Quaternion quat = Quaternion.AngleAxis(angle, Vector3.forward);
         transform.rotation = Quaternion.Slerp(transform.rotation, quat, rotationSpeed * Time.deltaTime);
     }
+
     private void MoveIdle()
     {
         rb.AddForce(new Vector2(UnityEngine.Random.Range(-idleMovement, idleMovement), UnityEngine.Random.Range(-idleMovement, idleMovement)));
+        if (!toggleParticlesOnce)
+        {
+            toggleParticlesOnce = true;
+            particleFly.ToggleParticlesFly();
+            ToggleParticleStand();
+
+        }
+    }
+
+    private void ToggleParticleStand()
+    {
+        if (particleStand.isEmitting) particleStand.enableEmission = false;
+        else particleStand.enableEmission = true;
     }
 }
