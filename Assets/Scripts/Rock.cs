@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Rock : MonoBehaviour
 {
+    
     public ParticleSystem death;
     private bool dieOnce = false;
     public SpriteRenderer render;
