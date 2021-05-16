@@ -16,7 +16,7 @@ TagManager:
   - Enemies
   - CameraBounds
   - ObjetsThatBossIgnores
-  - 
+  - ObjectsThatCollideOnlyWithObjects
   - 
   - 
   - 

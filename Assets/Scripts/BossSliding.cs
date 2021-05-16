@@ -10,7 +10,9 @@ public class BossSliding : MonoBehaviour
     public Transform secondPoint;
     public Rigidbody2D rb;
 
-   
+    public SpriteRenderer render;
+    public Sprite sprite;
+
     private void FixedUpdate()
     {
         CheckPosition();
