@@ -17,18 +17,29 @@ public class BossAi : MonoBehaviour
     public Vector2 nextSurfacePosition;
     public float particleMovementSpeed = 3f;
     public ParticleSystem movingParticleSystem;
+    public bool movingToNewPoint = false;
     // Start is called before the first frame update
     void Start()
     {
         nextSurfacePosition.y = -1;
-
+        //startBurrow();
+        SurfaceAtDiffrentLocation();
 
     }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        CheckIfPlayerIsNear();
+        //CheckIfPlayerIsNear();
+    }
+
+ 
+    void FixedUpdate()
+    {
+        if (movingToNewPoint) MoveParticleSystem();
+    }
+    public IEnumerator startBurrow()
+    {
+        SurfaceAtDiffrentLocation();
+        yield return new WaitForSeconds(8f);
     }
     private void CheckIfPlayerIsNear()
     {
@@ -41,20 +52,29 @@ public class BossAi : MonoBehaviour
     }
     private void SurfaceAtDiffrentLocation()
     {
-        nextSurfacePosition.x = Random.Range(minDistanceToTheSide, maxDistanceToTheSide);
+        nextSurfacePosition.x = Random.Range(minDistanceToTheSide - rb.position.x, maxDistanceToTheSide + rb.position.x);
+        movingToNewPoint = true;
+        Debug.Log("Setet new Location at " + nextSurfacePosition.x);
         
 
     }
     //Only do this while something is false or true ^^
     private void MoveParticleSystem()
     {
+        if (rb.position.x > nextSurfacePosition.x - particleMovementSpeed && rb.position.x < nextSurfacePosition.x + particleMovementSpeed)
+        {
+            movingToNewPoint = false;
+            SurfaceAtDiffrentLocation();
+            Debug.Log("Reached destination!, setting new point");
+            return;
+        }
         if(rb.position.x < nextSurfacePosition.x)
         {
-            transform.position = new Vector3(transform.position.x + particleMovementSpeed, transform.position.y, 0);
+            transform.position = new Vector3(transform.position.x + particleMovementSpeed * Time.deltaTime, transform.position.y, 0);
         }
         else if(rb.position.x > nextSurfacePosition.x)
         {
-            transform.position = new Vector3(-1 * transform.position.x + particleMovementSpeed, transform.position.y, 0);
+            transform.position = new Vector3( (transform.position.x - particleMovementSpeed * Time.deltaTime), transform.position.y, 0);
         }
     }
     void Die()
