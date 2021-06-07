@@ -52,8 +52,7 @@ public class PlayerManagment : MonoBehaviour
 
 
     private void OnCollisionEnter2D(Collision2D collision)
-    {
-        
+    {   
         if (invincble ||collision.gameObject == null) return;
 
         GameObject tempObject = collision.gameObject;
@@ -126,5 +125,13 @@ public class PlayerManagment : MonoBehaviour
     private void Healing()
     {
         if (health < 5) health++;
+    }
+
+    public void TakeDamage()
+    {
+        if (invincble) return;
+        invincble = true;
+
+        PlayerIsHit();
     }
 }

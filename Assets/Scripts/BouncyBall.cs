@@ -15,9 +15,11 @@ public class BouncyBall : MonoBehaviour
     public float amoutOfJumpsTillDeath =100;
     public GameObject ball;
     
-    public bool isBoss = true;
+    public bool isBoss = false;
     public Sprite sprite;
     public SpriteRenderer renderer;
+    public Animator animator;
+
     private void Start()
     {
         float tempX = whichDirection.position.x - rb.position.x;
@@ -27,11 +29,10 @@ public class BouncyBall : MonoBehaviour
         forceVec.Normalize();
         forceVec*= force;
         rb.AddForce(forceVec);
-        if (!collideWithOtherBalls) ball.layer = notCollidingWithOtherBalls;
+        //if (!collideWithOtherBalls) ball.layer = notCollidingWithOtherBalls;
         if(isBoss)
         {
-            
-            //renderer.sprite = sprite;                     //Insert Boss Sprite here
+            animator.SetBool("IsBoss", true);
             Vector3 temp = ball.transform.localScale;
             temp.x *= bossUpScaling;
             temp.y *= bossUpScaling;
@@ -45,5 +46,7 @@ public class BouncyBall : MonoBehaviour
     private void Update()
     {
         if (amoutOfJumpsTillDeath <= 0) Destroy(ball);
+
     }
+
 }
