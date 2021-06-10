@@ -23,8 +23,8 @@ public class PlayerAttack : MonoBehaviour
     private float currentSwordAttackCounter = 0f;
     void Update()
     {
-        horizontal = Input.GetAxisRaw("Horizontal");
-        vertical = Input.GetAxisRaw("Vertical");
+        //horizontal = Input.GetAxisRaw("Horizontal");
+        //vertical = Input.GetAxisRaw("Vertical");
         airborn = player.airborn;
         currentSwordAttackCounter++;
 

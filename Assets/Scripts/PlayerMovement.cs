@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 
 public class PlayerMovement : MonoBehaviour
@@ -9,8 +10,8 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rigidBody;
     public Animator animator;
 
-    [SerializeField] float runSpeed = 40f;                  //Controls RunSpeed for player
-    [SerializeField] float jumpHeight = 0f;                //Controls jumpforce
+    [SerializeField] float runSpeed;                        //Controls RunSpeed for player
+    [SerializeField] float jumpHeight;                //Controls jumpforce
     [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
     [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
     [SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
@@ -23,16 +24,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float pogoHeight = 0f;                 //When hitting something with sword in the air, how far the player is send high;
 
 
-    private float horizontalMovement = 0f;                  //Important for moving left and right take input
     private float lastHorizontMovement = 0f;                //Important for knowing which direction the next dash is gonna go, when not moving
-    private float vertialMovement = 1f;                     //Goes from 3 to -3 -> Only controls down movement right now
 
-    private float dashButtonPressed = 0f;                   //0 When right should button is not pressed. 1 When pressed
     private bool downMovement = false;                      //True = Player is pressing down , False not
     private bool dashReady = true;                          //True -> PLayer can dash
     private float dashCounter = 25f;                        //Counts intervalls between dashes
     private bool dashOnlyOnceInAir = true;                  //Allows the player to only dash once in air
-    private bool doOnlyOnceTouchingWall = false;            //Used to stop Movement when hitting Wall, but only once per walltouch
 
     public bool grounded = true;                            //True when grounded in air false
     public bool airborn = false;                            //When jumping player is airborn
@@ -62,33 +59,58 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float doubleJumpIncreasment;           //Regulates ´how high the player can jump with double Jums
     public bool fallingFromPlattform = false;
 
+    PlayerControls controls;
+    Vector2 move;
+    
+    private void Awake()
+    {
+        controls = new PlayerControls();
+
+        controls.GamePlay.Move.performed += temp => move = temp.ReadValue<Vector2>();
+        controls.GamePlay.Move.canceled += temp => move = Vector2.zero;
+
+        controls.GamePlay.Dodge.performed += temp => Dash();
+        
+    }
+    private void GetUseInput() 
+    {
+        //Left Right Movement
+        Vector2 MovForce = move * runSpeed * Time.deltaTime;
+    }
+    private void OnEnable()
+    {
+        controls.GamePlay.Enable();
+    }
+    private void OnDisable()
+    {
+        controls.GamePlay.Disable();
+    }
+
     private void Start()
     {
         realJumpHeight = jumpHeight;
     }
 
+
+
+
     // Update is called once per frame
     void Update()
     {
-
+        GetUseInput();
 
         //Tells in which direction the player is facing
-        if (horizontalMovement < 0) lastHorizontMovement = -1;
-        if (horizontalMovement > 0) lastHorizontMovement = 1;
+        if (move.x < 0) lastHorizontMovement = -1;
+        if (move.x > 0) lastHorizontMovement = 1;
 
-        horizontalMovement = Input.GetAxisRaw("Horizontal") * runSpeed;
-        vertialMovement = Input.GetAxisRaw("Vertical") * runSpeed;
 
-        animator.SetFloat("Speed", Mathf.Abs(horizontalMovement));
+        //animator.SetFloat("Speed", Mathf.Abs(horizontalMovement));
 
         //Disables consecuent dashing while pressing the button (without not pressing it)
         if (dashCounter >= dashCooldown)
         {
-            dashButtonPressed = Input.GetAxisRaw("ControllerRightTrigger");
-            if (dashButtonPressed == 0)
-            {
-                dashReady = true;
-            }
+            Debug.Log("DashReady true");
+            dashReady = true;                                                                                                                                                                                                             
         }
 
 
@@ -132,7 +154,7 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = jumpDuration;
         }
         //Input for the down Button in the air
-        if ((Input.GetButton("Down") || (vertialMovement < 0) && (airborn || (touchWallLeft || touchWallRight))))
+        if ((Input.GetButton("Down") || (move.y < 0) && (airborn || (touchWallLeft || touchWallRight))))
         {
             downMovement = true;
         }
@@ -168,9 +190,8 @@ public class PlayerMovement : MonoBehaviour
         if (wallJump == 0 && (touchWallLeft || touchWallRight))
             rigidBody.velocity = new Vector2(0, wallSlideSpeed);
         //Movement
-        controller.Move(horizontalMovement, false, false);
-        //Dash
-        Dash();
+        controller.Move(move.x, false, false);
+
         //Jump
         Jump();
         //DownMovement in air
@@ -213,8 +234,10 @@ public class PlayerMovement : MonoBehaviour
     public void Dash()
     {
         //Active when PLayer pressed right button and is allowed to dash
-        if (dashButtonPressed == 1 && dashReady)
+        if (dashReady)
         {
+            Debug.Log("Dash triggered");
+            Debug.Log(dashReady);
             //Stops dash when it should be over and when already dashed once in air
             if (dashCounter >= dashCooldown && dashOnlyOnceInAir)
             {
@@ -225,7 +248,7 @@ public class PlayerMovement : MonoBehaviour
                 ResetDashVar();
 
                 //Apply force
-                rigidBody.AddForce(new Vector2(lastHorizontMovement * (dashForce - (System.Math.Abs(horizontalMovement) * dashMultiply)), 0));
+                rigidBody.AddForce(new Vector2(lastHorizontMovement * (dashForce - (System.Math.Abs(move.x) * dashMultiply)), 0));
             }
         }
     }
@@ -331,7 +354,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (rigidBody.velocity.y <= maxDownSpeed)
         {
-            Vector2 temp = new Vector2(horizontalMovement * 10, maxDownSpeed);
+            Vector2 temp = new Vector2(move.x * 10, maxDownSpeed);
             rigidBody.velocity = temp;
         }
     }
@@ -341,7 +364,7 @@ public class PlayerMovement : MonoBehaviour
     {
         wallTouchMethodExecuted = true;
         //Connects to wall when jumping next to a wall and pressing the button in the right direction
-        if (groundWallJump && horizontalMovement > 0)
+        if (groundWallJump && move.x > 0)
         {
             groundWallJump = false;
         }
@@ -357,7 +380,7 @@ public class PlayerMovement : MonoBehaviour
             slideDownWall = true;
             touchWallRight = false;
             //If slide Down Wall was used before and the player is not pressing down right now. It is set to false
-            if (vertialMovement == 0 && slideDownWall)
+            if (move.y == 0 && slideDownWall)
             {
                 canConnectToWAll = true;
                 slideDownWall = false;
@@ -370,12 +393,12 @@ public class PlayerMovement : MonoBehaviour
         if (!groundWallJump)
         {
             lastWallTouched = 2;
-            if (horizontalMovement >= 0 && !touchWallRight && canConnectToWAll && !downMovement && (currentJumpDuration > 3 || !groundWallJump))
+            if (move.x >= 0 && !touchWallRight && canConnectToWAll && !downMovement && (currentJumpDuration > 3 || !groundWallJump))
             {
                 touchWallRight = true;
                 ResetWallVar();
             }
-            else if (horizontalMovement < 0) // LEAVING WALL
+            else if (move.x < 0) // LEAVING WALL
             {
                 LeavingWallVar();
             }
@@ -386,7 +409,7 @@ public class PlayerMovement : MonoBehaviour
     {
         wallTouchMethodExecuted = true;
         //Connects to wall when jumping next to a wall and pressing the button in the right direction
-        if (groundWallJump && horizontalMovement < 0)
+        if (groundWallJump && move.x < 0)
         {
             groundWallJump = false;
         }
@@ -405,7 +428,7 @@ public class PlayerMovement : MonoBehaviour
             slideDownWall = true;
             touchWallLeft = false;
             //If slide Down Wall was used before and the player is not pressing down right now. It is set to false
-            if (vertialMovement == 0 && slideDownWall)
+            if (move.y == 0 && slideDownWall)
             {
                 canConnectToWAll = true;
                 slideDownWall = false;
@@ -418,12 +441,12 @@ public class PlayerMovement : MonoBehaviour
         if (!groundWallJump)
         {
             lastWallTouched = 1;
-            if (horizontalMovement <= 0 && !touchWallLeft && canConnectToWAll && (currentJumpDuration > 3 || !groundWallJump))
+            if (move.x <= 0 && !touchWallLeft && canConnectToWAll && (currentJumpDuration > 3 || !groundWallJump))
             {
                 touchWallLeft = true;
                 ResetWallVar();
             }
-            else if (horizontalMovement > 0) // LEAVING WALL
+            else if (move.x > 0) // LEAVING WALL
             {
                 LeavingWallVar();
             }
@@ -485,7 +508,7 @@ public class PlayerMovement : MonoBehaviour
             dashOnlyOnceInAir = false;
             rigidBody.velocity = Vector2.zero;
         }
-
+        Debug.Log("DashReady was reset");
         groundWallJump = false;
         dashReady = false;
         dashCounter = 0;
