@@ -50,7 +50,7 @@ public class PlayerMovement : MonoBehaviour
     private bool slideDownWall = false;                     //If the player wants to slide down the wall
 
     private float lastYPos;
-    private bool wallTouchMethodExecuted = false;           
+    private bool wallTouchMethodExecuted = false;
     private float coyoteWallTime = 0f;                       //Counts down CooyteWallTime
     private float coyoteWallStartTime = 2f;                  //How long the player has time to press the button after leaving the wall and still beeing able to jump
     private float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
 
     PlayerControls controls;
     Vector2 move;
-    
+
     private void Awake()
     {
         controls = new PlayerControls();
@@ -70,9 +70,13 @@ public class PlayerMovement : MonoBehaviour
         controls.GamePlay.Move.canceled += temp => move = Vector2.zero;
 
         controls.GamePlay.Dodge.performed += temp => Dash();
-        
+
+        controls.GamePlay.Jump.performed += temp => PreJumpCheck();
+        controls.GamePlay.Jump.canceled += temp => { StopYAcceleration();   currentJumpDuration = jumpDuration; };
+
     }
-    private void GetUseInput() 
+        
+    private void GetUseInput()
     {
         //Left Right Movement
         Vector2 MovForce = move * runSpeed * Time.deltaTime;
@@ -90,11 +94,34 @@ public class PlayerMovement : MonoBehaviour
     {
         realJumpHeight = jumpHeight;
     }
+    
+    private void PreJumpCheck()
+    {
+        //Checking if Player is touching Wall
+        if (((touchWallLeft || touchWallRight) || coyoteWallTime != 0))
+        {
+            
+            if (touchWallLeft)wallJump = 1;
+            else wallJump = 2;
 
+            ResetJumpVar();
+        }
+        //Used for double
+        else if (!doubleJumpedAlready && !grounded  && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
+        {
+            doubleJumpedAlready = true;
+            minimumJump = minimumJumpHeight;
+            currentJumpDuration = 0;
+            DoOnlyOnce = false;
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0);
 
-
-
-    // Update is called once per frame
+            animator.SetBool("JumpingUp", true);
+            animator.SetBool("JumpingDown", false);
+        }
+        //Normal grounded Jump
+        else if (grounded && rigidBody.velocity.y == 0) ResetJumpVar();  
+    }
+    
     void Update()
     {
         GetUseInput();
@@ -109,11 +136,9 @@ public class PlayerMovement : MonoBehaviour
         //Disables consecuent dashing while pressing the button (without not pressing it)
         if (dashCounter >= dashCooldown)
         {
-            Debug.Log("DashReady true");
-            dashReady = true;                                                                                                                                                                                                             
+            dashReady = true;
         }
-
-
+        /*
         //Input for Jumping while on wall
         if (Input.GetButtonDown("Jump") && ((touchWallLeft || touchWallRight) || coyoteWallTime != 0))
         {
@@ -128,19 +153,19 @@ public class PlayerMovement : MonoBehaviour
             ResetJumpVar();
         }
         //Double Jump
-        else if(!doubleJumpedAlready && !grounded && Input.GetButtonDown("Jump") && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
+        else if (!doubleJumpedAlready && !grounded && Input.GetButtonDown("Jump") && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
         {
             doubleJumpedAlready = true;
             minimumJump = minimumJumpHeight;
             currentJumpDuration = 0;
             DoOnlyOnce = false;
-            rigidBody.velocity = new Vector2 ( rigidBody.velocity.x, 0);
+            rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0);
 
             animator.SetBool("JumpingUp", true);
             animator.SetBool("JumpingDown", false);
 
-        }
-
+        }*/
+        /*
         //Input for Jumping while grounded
         else if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0)
         {
@@ -152,7 +177,7 @@ public class PlayerMovement : MonoBehaviour
         {
             StopYAcceleration();
             currentJumpDuration = jumpDuration;
-        }
+        }*/
         //Input for the down Button in the air
         if ((Input.GetButton("Down") || (move.y < 0) && (airborn || (touchWallLeft || touchWallRight))))
         {
@@ -176,8 +201,8 @@ public class PlayerMovement : MonoBehaviour
     {
         wallTouchMethodExecuted = false;
         //Count down coyoteWallTime
-           
-        if(coyoteWallTime != 0) coyoteWallTime--;
+
+        if (coyoteWallTime != 0) coyoteWallTime--;
 
         //Checks if the player is Airborn
         CheckIfAirborn();
@@ -197,12 +222,12 @@ public class PlayerMovement : MonoBehaviour
         //DownMovement in air
         DownMovement();
         //Stopp's jump in air
-        StopJump();
+        JumpStopVelocity();
         //TouchingWall Action
         //TouchingWall();
 
         //ANIMATION PART
-       
+
 
 
 
@@ -215,7 +240,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
     //Stops the jump after a certain time
-    public void StopJump()
+    public void JumpStopVelocity()
     {
         //Stops air acceleration after jumpDuratio is ovestepped
         if (currentJumpDuration >= jumpDuration && !DoOnlyOnce && !touchWallLeft && !touchWallRight)
@@ -236,8 +261,6 @@ public class PlayerMovement : MonoBehaviour
         //Active when PLayer pressed right button and is allowed to dash
         if (dashReady)
         {
-            Debug.Log("Dash triggered");
-            Debug.Log(dashReady);
             //Stops dash when it should be over and when already dashed once in air
             if (dashCounter >= dashCooldown && dashOnlyOnceInAir)
             {
@@ -252,6 +275,8 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
+
 
     //Makes the player jump the minimum JumpHeight
     public void Jump()
@@ -508,7 +533,6 @@ public class PlayerMovement : MonoBehaviour
             dashOnlyOnceInAir = false;
             rigidBody.velocity = Vector2.zero;
         }
-        Debug.Log("DashReady was reset");
         groundWallJump = false;
         dashReady = false;
         dashCounter = 0;
