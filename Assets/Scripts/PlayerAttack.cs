@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -16,50 +17,56 @@ public class PlayerAttack : MonoBehaviour
     public float detectionCircle = 0.5f;
     public LayerMask enemieLayer;
 
-    private float horizontal = 0f;              //Keeps PlayerMovement horzontal from player
-    private float vertical = 0f;
-    private bool airborn = false;    // Update is called once per frame
+
+    private bool airborn = false;   
 
     private float currentSwordAttackCounter = 0f;
+
+    Vector2 move;
+
+ 
+
+
+    public void Attack()
+    {
+        if (currentSwordAttackCounter <= swordAttackCooldown) return;       
+        
+        if(airborn && move.y < 0)//Air attack down
+        {
+            animator.SetTrigger("AttackAirDown");
+            swordChecker = swordPointDown;
+        }
+        else if (!airborn && move.y > 0)//Grounded Attack up
+        {
+            animator.SetTrigger("AttackUpGrounded");
+            swordChecker = swordPointUp;
+        }
+        else if (airborn && move.y > 0)//Airborn attack up
+        {
+            animator.SetTrigger("AttackAirUp");
+            swordChecker = swordPointUp;
+        }
+        else if (airborn)//Attack facing direction in air
+        {
+            animator.SetTrigger("AttackAirLR");
+            swordChecker = swordPointNormal;
+        }
+        else            //Facing attack on grounded
+        {
+            animator.SetTrigger("AttackLR");
+            swordChecker = swordPointNormal;
+        }
+        Attacking();
+    }
+
     void Update()
     {
-        //horizontal = Input.GetAxisRaw("Horizontal");
-        //vertical = Input.GetAxisRaw("Vertical");
         airborn = player.airborn;
+        move = player.move;
+    }
+    private void FixedUpdate()
+    {
         currentSwordAttackCounter++;
-
-        if (Input.GetButtonDown("Attack") && currentSwordAttackCounter >= swordAttackCooldown)
-        {
-            currentSwordAttackCounter = 0;
-            if (airborn && vertical < 0)
-            {
-                animator.SetTrigger("AttackAirDown");
-                swordChecker = swordPointDown;
-            }
-            else if(!airborn && vertical > 0)
-            {
-                animator.SetTrigger("AttackUpGrounded");
-                swordChecker = swordPointUp;
-            }
-            else if (airborn && vertical > 0)
-            {
-                animator.SetTrigger("AttackAirUp");
-                 swordChecker = swordPointUp;
-            }
-            else if (airborn)
-            {
-                animator.SetTrigger("AttackAirLR");
-                swordChecker = swordPointNormal;
-            }
-            else
-            {
-                animator.SetTrigger("AttackLR");
-                swordChecker = swordPointNormal;
-            }
-            Attacking();
-
-            
-        }    
     }
 
     private void Attacking()
@@ -67,21 +74,18 @@ public class PlayerAttack : MonoBehaviour
         Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(swordChecker.position, detectionCircle, enemieLayer);
         foreach(Collider2D enemy in hitEnemies)
         {
-            enemy.GetComponent<Enemy>().HitBySword(horizontal * 500 + 50,vertical  * 500 + 50);
+            enemy.GetComponent<Enemy>().HitBySword(move.x * 500 + 50,move.y  * 500 + 50);
             
-            if(airborn && vertical < 0) { 
+            if(airborn && move.y < 0) { //No boost while jumping up !!! Is maybe not working
                 Debug.Log("Shoul get boost");
                 player.HitTargetInAir();
             }
         }
-
     }
 
     private void OnDrawGizmosSelected()
     {
         if (swordPointNormal == null) return;
-
-
         //Gizmos.DrawWireSphere(swordPointDown.position, detectionCircle);
     }
    

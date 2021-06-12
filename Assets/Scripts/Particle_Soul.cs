@@ -14,7 +14,8 @@ public class Particle_Soul : MonoBehaviour
     {
         transform.rotation = Quaternion.Euler(0, 0, 0);
 
-        particels.enableEmission = enableParticles;
+        //particels.enableEmission = enableParticles;
+        particels.Play();
     }
     
     public void ToggleParticlesFly()

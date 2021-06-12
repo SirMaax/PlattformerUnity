@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     public CharacterController2D controller;
+    public PlayerAttack plAttack;
     public Rigidbody2D rigidBody;
     public Animator animator;
 
@@ -14,7 +15,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float jumpHeight;                //Controls jumpforce
     [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
     [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
-    [SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
+    //[SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
     [SerializeField] float dashForce = 0f;                  //Intial force behind a dash
     [SerializeField] float dashCooldown = 0f;               //How long the cooldown between dashes is
     [SerializeField] float dashMultiply = 0.1f;             //How far the player dashes
@@ -60,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
     public bool fallingFromPlattform = false;
 
     PlayerControls controls;
-    Vector2 move;
+    public Vector2 move;
 
     private void Awake()
     {
@@ -74,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
         controls.GamePlay.Jump.performed += temp => PreJumpCheck();
         controls.GamePlay.Jump.canceled += temp => { StopYAcceleration();   currentJumpDuration = jumpDuration; };
 
+        controls.GamePlay.Attack.performed += temp => plAttack.Attack();
     }
         
     private void GetUseInput()
@@ -130,8 +132,7 @@ public class PlayerMovement : MonoBehaviour
         if (move.x < 0) lastHorizontMovement = -1;
         if (move.x > 0) lastHorizontMovement = 1;
 
-
-        //animator.SetFloat("Speed", Mathf.Abs(horizontalMovement));
+        animator.SetFloat("Speed", Mathf.Abs(move.x));
 
         //Disables consecuent dashing while pressing the button (without not pressing it)
         if (dashCounter >= dashCooldown)
@@ -179,10 +180,16 @@ public class PlayerMovement : MonoBehaviour
             currentJumpDuration = jumpDuration;
         }*/
         //Input for the down Button in the air
+
+
+
+        /*
         if ((Input.GetButton("Down") || (move.y < 0) && (airborn || (touchWallLeft || touchWallRight))))
         {
             downMovement = true;
         }
+
+        */
         //Order is important 
         if (!wallTouchMethodExecuted && (touchWallRight || touchWallLeft))
         {

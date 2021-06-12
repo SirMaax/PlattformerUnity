@@ -36,11 +36,6 @@ public class PlayerManagment : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetButtonDown("HealingTest"))
-        {
-            Healing();
-            UpdateHealth();
-        }
     }
 
     private void FixedUpdate()

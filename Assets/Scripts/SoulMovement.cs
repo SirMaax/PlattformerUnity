@@ -92,7 +92,9 @@ public class SoulMovement : MonoBehaviour
 
     private void ToggleParticleStand()
     {
-        if (particleStand.isEmitting) particleStand.enableEmission = false;
-        else particleStand.enableEmission = true;
+        //if (particleStand.isEmitting) particleStand.enableEmission = false;
+        if (particleStand.isEmitting) particleStand.Stop();
+        //else particleStand.enableEmission = true;
+        else particleStand.Play();
     }
 }

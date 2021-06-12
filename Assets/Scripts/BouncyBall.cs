@@ -17,7 +17,6 @@ public class BouncyBall : MonoBehaviour
     
     public bool isBoss = false;
     public Sprite sprite;
-    public SpriteRenderer renderer;
     public Animator animator;
 
     private void Start()
