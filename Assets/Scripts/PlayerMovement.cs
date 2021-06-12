@@ -78,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
         controls.GamePlay.Attack.performed += temp => plAttack.Attack();
     }
         
-    private void GetUseInput()
+    private void GetUseInput()                           
     {
         //Left Right Movement
         Vector2 MovForce = move * runSpeed * Time.deltaTime;
@@ -86,10 +86,10 @@ public class PlayerMovement : MonoBehaviour
     private void OnEnable()
     {
         controls.GamePlay.Enable();
-    }
+    }                                     
     private void OnDisable()
     {
-        controls.GamePlay.Disable();
+        controls.GamePlay.Disable();                             
     }
 
     private void Start()

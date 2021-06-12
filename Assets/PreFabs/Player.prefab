@@ -149,13 +149,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 3435499331756499886}
+  plAttack: {fileID: 3435499331756499885}
   rigidBody: {fileID: 3435499331756499887}
   animator: {fileID: 3435499331756499884}
   runSpeed: 1.5
   jumpHeight: 112
   downMovementForce: 15
   minimumJumpHeight: 0.4
-  jumpHeightRecument: 1.5
   dashForce: 5000
   dashCooldown: 25
   dashMultiply: 550
@@ -178,6 +178,7 @@ MonoBehaviour:
   doubleJumpedAlready: 0
   doubleJumpIncreasment: 1.3
   fallingFromPlattform: 0
+  move: {x: 0, y: 0}
 --- !u!114 &3435499331756499886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,6 +309,12 @@ MonoBehaviour:
   invincibilityTime: 1
   knockBackFromEnemies: 1350
   knockBackFromEnemiesWhenUnderThem: 1150
+  Health5: {fileID: 0}
+  Health4: {fileID: 0}
+  Health3: {fileID: 0}
+  Health2: {fileID: 0}
+  Health1: {fileID: 0}
+  Health0: {fileID: 0}
   player: {fileID: 3435499331756499882}
 --- !u!50 &3435499331756499887
 Rigidbody2D:
@@ -368,7 +375,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1402390579
-  m_SortingLayer: 1
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 6a4c1e6775eb5a04aa42388a6df4cafb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
