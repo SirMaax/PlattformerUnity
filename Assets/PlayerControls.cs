@@ -22,7 +22,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""12031dfe-d2ba-44d1-b59e-dd971b6100e8"",
-                    ""expectedControlType"": ""Stick"",
+                    ""expectedControlType"": ""Analog"",
                     ""processors"": """",
                     ""interactions"": """"
                 },
@@ -49,6 +49,14 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Hook"",
+                    ""type"": ""Button"",
+                    ""id"": ""ab2f0e5f-eac6-4412-8afa-50ab75ee637a"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -57,7 +65,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""id"": ""ff2ad08a-f5f1-4bec-96be-544868053db9"",
                     ""path"": ""<Gamepad>/leftStick"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone"",
                     ""groups"": """",
                     ""action"": ""Move"",
                     ""isComposite"": false,
@@ -128,6 +136,17 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b51d23a7-9fed-4b71-9152-cebb7aafe165"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Hook"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -140,6 +159,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         m_GamePlay_Dodge = m_GamePlay.FindAction("Dodge", throwIfNotFound: true);
         m_GamePlay_Attack = m_GamePlay.FindAction("Attack", throwIfNotFound: true);
         m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
+        m_GamePlay_Hook = m_GamePlay.FindAction("Hook", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -193,6 +213,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     private readonly InputAction m_GamePlay_Dodge;
     private readonly InputAction m_GamePlay_Attack;
     private readonly InputAction m_GamePlay_Jump;
+    private readonly InputAction m_GamePlay_Hook;
     public struct GamePlayActions
     {
         private @PlayerControls m_Wrapper;
@@ -201,6 +222,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         public InputAction @Dodge => m_Wrapper.m_GamePlay_Dodge;
         public InputAction @Attack => m_Wrapper.m_GamePlay_Attack;
         public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
+        public InputAction @Hook => m_Wrapper.m_GamePlay_Hook;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -222,6 +244,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Jump.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnJump;
+                @Hook.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHook;
+                @Hook.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHook;
+                @Hook.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHook;
             }
             m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
             if (instance != null)
@@ -238,6 +263,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @Hook.started += instance.OnHook;
+                @Hook.performed += instance.OnHook;
+                @Hook.canceled += instance.OnHook;
             }
         }
     }
@@ -248,5 +276,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         void OnDodge(InputAction.CallbackContext context);
         void OnAttack(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnHook(InputAction.CallbackContext context);
     }
 }

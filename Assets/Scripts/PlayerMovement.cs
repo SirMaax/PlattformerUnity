@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
 {
     public CharacterController2D controller;
     public PlayerAttack plAttack;
+    public HookShooter hook;
     public Rigidbody2D rigidBody;
     public Animator animator;
 
@@ -27,6 +28,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float lastHorizontMovement = 0f;                //Important for knowing which direction the next dash is gonna go, when not moving
 
+    private bool cancelMovement = false;
     private bool downMovement = false;                      //True = Player is pressing down , False not
     private bool dashReady = true;                          //True -> PLayer can dash
     private float dashCounter = 25f;                        //Counts intervalls between dashes
@@ -76,8 +78,11 @@ public class PlayerMovement : MonoBehaviour
         controls.GamePlay.Jump.canceled += temp => { StopYAcceleration();   currentJumpDuration = jumpDuration; };
 
         controls.GamePlay.Attack.performed += temp => plAttack.Attack();
+
+        controls.GamePlay.Hook.performed += temp => { hook.aimingActiveToggle(); cancelMovement = true; };
+        controls.GamePlay.Hook.canceled += temp => { hook.shootHook(); cancelMovement = false; };
     }
-        
+
     private void GetUseInput()                           
     {
         //Left Right Movement
@@ -215,14 +220,14 @@ public class PlayerMovement : MonoBehaviour
         CheckIfAirborn();
         //Clamp gravityDownFallSpeed
         ClampGravity();
-        //Counts airtime
         //Counts intervall between dashes
         dashCounter++;
         //Slide down Wall
         if (wallJump == 0 && (touchWallLeft || touchWallRight))
             rigidBody.velocity = new Vector2(0, wallSlideSpeed);
         //Movement
-        controller.Move(move.x, false, false);
+        if(!cancelMovement)controller.Move(move.x, false, false);
+
 
         //Jump
         Jump();

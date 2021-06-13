@@ -39,7 +39,7 @@ public class PlayerAttack : MonoBehaviour
         else if (!airborn && move.y > 0)//Grounded Attack up
         {
             animator.SetTrigger("AttackUpGrounded");
-            swordChecker = swordPointUp;
+             swordChecker = swordPointUp;
         }
         else if (airborn && move.y > 0)//Airborn attack up
         {

@@ -15,13 +15,17 @@ public class test : MonoBehaviour
         
 
         playerControls.GamePlay.Move.performed += temp => move = temp.ReadValue<Vector2>();
-        playerControls.GamePlay.Move.canceled += temp => move = Vector2.zero;
+        playerControls.GamePlay.Move.canceled += temp => move = Vector2.zero;                                              
 
     }
     private void Update()
     {
-        Vector2 move2 = move * Force *Time.deltaTime;
-        Debug.Log(move2);
+        
+        Debug.Log(move);
+        Vector3 vec3 = new Vector3(0, 2, 0);
+        Vector3 temp = new Vector3(move.x, move.y, 0);
+        temp = vec3 + temp;
+        Debug.DrawLine(vec3, temp);
     }
     private void OnEnable()
     {
