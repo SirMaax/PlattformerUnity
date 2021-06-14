@@ -43,14 +43,12 @@ public class HookShooter : MonoBehaviour
         airtime = 0;
         if (direction == Vector2.zero && oldDirection != Vector2.zero) direction = oldDirection;
 
-        Debug.Log(direction);
     }
     public void updateDirection()
     {
         move = player.move;
         move *= 5;
         direction = move;
-        Debug.Log(direction);
         direction.Normalize();
         direction *= hookForce;
     }

@@ -4,35 +4,32 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 public class test : MonoBehaviour
 {
+    public Transform hookTransform;
+    public float hookForce = 400;
+    public Rigidbody2D rigidBody;
+    public PlayerControls controls;
+    bool hookPullActive = false;
 
-    PlayerControls playerControls;
-    Vector2 move;
-    float Force = 40;
     private void Awake()
     {
 
-        playerControls = new PlayerControls();
-        
+        controls = new PlayerControls();
 
-        playerControls.GamePlay.Move.performed += temp => move = temp.ReadValue<Vector2>();
-        playerControls.GamePlay.Move.canceled += temp => move = Vector2.zero;                                              
+        controls.GamePlay.HookPull.performed += temp => { hookPullActive = true; };
+        controls.GamePlay.HookPull.canceled += temp => { hookPullActive = false; };
+    }
 
-    }
-    private void Update()
+
+    private void FixedUpdate()
     {
-        
-        Debug.Log(move);
-        Vector3 vec3 = new Vector3(0, 2, 0);
-        Vector3 temp = new Vector3(move.x, move.y, 0);
-        temp = vec3 + temp;
-        Debug.DrawLine(vec3, temp);
+        if (hookPullActive) PullToHook();
     }
-    private void OnEnable()
+    
+    private void PullToHook()
     {
-        playerControls.GamePlay.Enable();
-    }
-    private void OnDisable()
-    {
-        playerControls.GamePlay.Disable();
+        Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
+        direction.Normalize();
+        direction *= hookForce;
+        rigidBody.AddForce(direction);
     }
 }

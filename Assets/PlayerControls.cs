@@ -57,6 +57,14 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""HookPull"",
+                    ""type"": ""Button"",
+                    ""id"": ""a2aac6fd-7862-4efd-a8a0-29b8b205fa1b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -147,6 +155,17 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                     ""action"": ""Hook"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0d65e321-494c-403e-93f5-df01a820ae74"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""HookPull"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -160,6 +179,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         m_GamePlay_Attack = m_GamePlay.FindAction("Attack", throwIfNotFound: true);
         m_GamePlay_Jump = m_GamePlay.FindAction("Jump", throwIfNotFound: true);
         m_GamePlay_Hook = m_GamePlay.FindAction("Hook", throwIfNotFound: true);
+        m_GamePlay_HookPull = m_GamePlay.FindAction("HookPull", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -214,6 +234,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
     private readonly InputAction m_GamePlay_Attack;
     private readonly InputAction m_GamePlay_Jump;
     private readonly InputAction m_GamePlay_Hook;
+    private readonly InputAction m_GamePlay_HookPull;
     public struct GamePlayActions
     {
         private @PlayerControls m_Wrapper;
@@ -223,6 +244,7 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         public InputAction @Attack => m_Wrapper.m_GamePlay_Attack;
         public InputAction @Jump => m_Wrapper.m_GamePlay_Jump;
         public InputAction @Hook => m_Wrapper.m_GamePlay_Hook;
+        public InputAction @HookPull => m_Wrapper.m_GamePlay_HookPull;
         public InputActionMap Get() { return m_Wrapper.m_GamePlay; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -247,6 +269,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Hook.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHook;
                 @Hook.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHook;
                 @Hook.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHook;
+                @HookPull.started -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHookPull;
+                @HookPull.performed -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHookPull;
+                @HookPull.canceled -= m_Wrapper.m_GamePlayActionsCallbackInterface.OnHookPull;
             }
             m_Wrapper.m_GamePlayActionsCallbackInterface = instance;
             if (instance != null)
@@ -266,6 +291,9 @@ public class @PlayerControls : IInputActionCollection, IDisposable
                 @Hook.started += instance.OnHook;
                 @Hook.performed += instance.OnHook;
                 @Hook.canceled += instance.OnHook;
+                @HookPull.started += instance.OnHookPull;
+                @HookPull.performed += instance.OnHookPull;
+                @HookPull.canceled += instance.OnHookPull;
             }
         }
     }
@@ -277,5 +305,6 @@ public class @PlayerControls : IInputActionCollection, IDisposable
         void OnAttack(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnHook(InputAction.CallbackContext context);
+        void OnHookPull(InputAction.CallbackContext context);
     }
 }

@@ -62,6 +62,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float doubleJumpIncreasment;           //Regulates ´how high the player can jump with double Jums
     public bool fallingFromPlattform = false;
 
+    //Hook
+    public Transform hookTransform;
+    [SerializeField] float hookForce;
+    bool hookPullActive = false;
+
+    //New Movement
     PlayerControls controls;
     public Vector2 move;
 
@@ -81,11 +87,17 @@ public class PlayerMovement : MonoBehaviour
 
         controls.GamePlay.Hook.performed += temp => { hook.aimingActiveToggle(); cancelMovement = true; };
         controls.GamePlay.Hook.canceled += temp => { hook.shootHook(); cancelMovement = false; };
+
+        //controls.GamePlay.HookPull.performed += temp => { hookPullActive=true; };
+        //controls.GamePlay.HookPull.canceled += temp => { hookPullActive = false;  };
+        controls.GamePlay.HookPull.canceled += temp => { PullToHook2(); hookPullActive = true; };
+
     }
 
     private void GetUseInput()                           
     {
         //Left Right Movement
+
         Vector2 MovForce = move * runSpeed * Time.deltaTime;
     }
     private void OnEnable()
@@ -144,49 +156,7 @@ public class PlayerMovement : MonoBehaviour
         {
             dashReady = true;
         }
-        /*
-        //Input for Jumping while on wall
-        if (Input.GetButtonDown("Jump") && ((touchWallLeft || touchWallRight) || coyoteWallTime != 0))
-        {
-            if (touchWallLeft)
-            {
-                wallJump = 1;
-            }
-            else
-            {
-                wallJump = 2;
-            }
-            ResetJumpVar();
-        }
-        //Double Jump
-        else if (!doubleJumpedAlready && !grounded && Input.GetButtonDown("Jump") && (airborn || fallingFromPlattform) && !touchWallLeft && !touchWallRight)
-        {
-            doubleJumpedAlready = true;
-            minimumJump = minimumJumpHeight;
-            currentJumpDuration = 0;
-            DoOnlyOnce = false;
-            rigidBody.velocity = new Vector2(rigidBody.velocity.x, 0);
-
-            animator.SetBool("JumpingUp", true);
-            animator.SetBool("JumpingDown", false);
-
-        }*/
-        /*
-        //Input for Jumping while grounded
-        else if (Input.GetButtonDown("Jump") && grounded && rigidBody.velocity.y == 0)
-        {
-            ResetJumpVar();
-        }
-
-        //Input for releasing the Jump Button
-        if (Input.GetButtonUp("Jump") && airborn)
-        {
-            StopYAcceleration();
-            currentJumpDuration = jumpDuration;
-        }*/
-        //Input for the down Button in the air
-
-
+        
 
         /*
         if ((Input.GetButton("Down") || (move.y < 0) && (airborn || (touchWallLeft || touchWallRight))))
@@ -208,13 +178,39 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// //////////////////////////////////////////////
     /// </summary>
+    /// 
+    private void FixedUpdate2()
+    {
+        if(airborn && !cancelMovement) controller.Move2(move.x, false, false, true);
+        else if (!cancelMovement) controller.Move2(move.x, false, false,false);
+        //if (!cancelMovement && move.x != 0) controller.Move(move.x);
+        //if (!cancelMovement) Move();
 
+    }
+    private void FixedUpdate3()
+    {
+        Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
+        //direction.Normalize();
+        //direction *= hookForce;
+        Debug.Log(direction);
+        //Debug.DrawLine(rigidBody.position, hookTransform.position);
+        //Movement
+        if (hookPullActive) PullToHook();
+        //if (!cancelMovement) controller.Move(move.x, false, false);
+        //Jump
+    }
     private void FixedUpdate()
     {
+        //if (airborn && !cancelMovement) controller.Move2(move.x, false, false, hookPullActive);
+         if (!cancelMovement) controller.Move2(move.x, false, false, hookPullActive);
+
         wallTouchMethodExecuted = false;
         //Count down coyoteWallTime
 
         if (coyoteWallTime != 0) coyoteWallTime--;
+
+        //For pulling to the hook
+        
 
         //Checks if the player is Airborn
         CheckIfAirborn();
@@ -226,9 +222,7 @@ public class PlayerMovement : MonoBehaviour
         if (wallJump == 0 && (touchWallLeft || touchWallRight))
             rigidBody.velocity = new Vector2(0, wallSlideSpeed);
         //Movement
-        if(!cancelMovement)controller.Move(move.x, false, false);
-
-
+            //if(!cancelMovement)controller.Move(move.x, false, false);
         //Jump
         Jump();
         //DownMovement in air
@@ -263,7 +257,7 @@ public class PlayerMovement : MonoBehaviour
 
             animator.SetBool("JumpingDown", true);
             animator.SetBool("JumpingUp", false);
-        }
+        } 
     }
 
 
@@ -351,8 +345,9 @@ public class PlayerMovement : MonoBehaviour
     }
     public void OnLanding()
     {
-        if (!grounded)
+        if (!grounded || hookPullActive)
         {
+            hookPullActive = false ;
             animator.SetBool("JumpingDown", false);
             animator.SetBool("Walled", false);
             grounded = true;
@@ -389,7 +384,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void ClampGravity()
     {
-        if (rigidBody.velocity.y <= maxDownSpeed)
+        if (rigidBody.velocity.y <= maxDownSpeed && !hookPullActive)
         {
             Vector2 temp = new Vector2(move.x * 10, maxDownSpeed);
             rigidBody.velocity = temp;
@@ -567,5 +562,43 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void PullToHook()
+    {
+        //rigidBody.gravityScale = 0;
+        rigidBody.velocity = Vector2.zero;
+        Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
+        //direction.Normalize();
+        direction *= hookForce;
+        //rigidBody.AddForce(direction);
+        rigidBody.AddForceAtPosition((Vector2)hookTransform.position, rigidBody.position);
+    }
+    private void PullToHook2()
+    {
+        //rigidBody.gravityScale = 0;
+        //rigidBody.velocity = Vector2.zero;
+        Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
+        direction.Normalize();
+        direction *= hookForce;
+        rigidBody.AddForce(direction);
+        //rigidBody.AddForceAtPosition((Vector2)hookTransform.position, rigidBody.position);
+    }
+    private void Move()
+    {
+        Vector2 temp = move;
+        temp.Normalize();
+        temp *= runSpeed;
+       //float tempy = rigidBody.velocity.y;
 
+        rigidBody.AddForce(new Vector2(temp.x, 0));
+        
+    }
+    private void Flip()
+    {
+        // Multiply the player's x local scale by -1.
+
+        Vector3 theScale = transform.localScale;
+        theScale.x *= -1;
+        transform.localScale = theScale;
+    }
 }
+
