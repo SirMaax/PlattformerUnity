@@ -6,6 +6,7 @@ public class HookShooter : MonoBehaviour
 {
     public PlayerMovement player;
     public Rigidbody2D rb;
+    public Hook2 hook;
 
     [SerializeField] float hookForce;
     [SerializeField] float coyoteStickInputTime;            //How long the last input is keept when hook is triggerd. 
@@ -26,6 +27,8 @@ public class HookShooter : MonoBehaviour
     {
         if (aimingActive) StartCoroutine(keepDirection());
         if (aimingActive) updateDirection();
+
+        Debug.Log(direction);
     }
     private void FixedUpdate()
     {
@@ -37,7 +40,9 @@ public class HookShooter : MonoBehaviour
     }
     public void shootHook()
     {
-        if (direction == Vector2.zero && oldDirection == Vector2.zero) return; 
+        if (direction == Vector2.zero && oldDirection == Vector2.zero) return;
+        //hook.enabled = true;
+        rb.position = player.rigidBody.position;
         aimingActive = false;
         hookActive = true;
         airtime = 0;
@@ -76,6 +81,11 @@ public class HookShooter : MonoBehaviour
         Debug.Log("One run through");
         yield return null;
     }
-
+    public void ResetHook()
+    {
+        hookAtTarget = false;
+        hook.enabled = false;
+        hookActive = false;
+    }
  
 }

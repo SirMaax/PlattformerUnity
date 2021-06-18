@@ -90,7 +90,8 @@ public class PlayerMovement : MonoBehaviour
 
         //controls.GamePlay.HookPull.performed += temp => { hookPullActive=true; };
         //controls.GamePlay.HookPull.canceled += temp => { hookPullActive = false;  };
-        controls.GamePlay.HookPull.canceled += temp => { PullToHook2(); hookPullActive = true; };
+        controls.GamePlay.HookPull.performed += temp => { PullToHook2(); hookPullActive = true; };
+        controls.GamePlay.HookPull.canceled += temp => { hook.ResetHook(); hookPullActive = false; };
 
     }
 
