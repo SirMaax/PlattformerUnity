@@ -71,6 +71,9 @@ public class PlayerMovement : MonoBehaviour
     PlayerControls controls;
     public Vector2 move;
 
+    [SerializeField] float hookCoolDownSeconds;
+    bool CanShootHook = true;
+
     private void Awake()
     {
         controls = new PlayerControls();
@@ -81,12 +84,28 @@ public class PlayerMovement : MonoBehaviour
         controls.GamePlay.Dodge.performed += temp => Dash();
 
         controls.GamePlay.Jump.performed += temp => PreJumpCheck();
-        controls.GamePlay.Jump.canceled += temp => { StopYAcceleration();   currentJumpDuration = jumpDuration; };
+        controls.GamePlay.Jump.canceled += temp => { StopYAcceleration(); currentJumpDuration = jumpDuration; };
 
         controls.GamePlay.Attack.performed += temp => plAttack.Attack();
 
-        controls.GamePlay.Hook.performed += temp => { hook.aimingActiveToggle(); cancelMovement = true; };
-        controls.GamePlay.Hook.canceled += temp => { hook.shootHook(); cancelMovement = false; };
+
+        controls.GamePlay.Hook.performed += temp => {
+            if (CanShootHook)
+            {
+                hook.aimingActiveToggle(); 
+                cancelMovement = true;
+            }
+        };
+        controls.GamePlay.Hook.canceled += temp => {
+            if (CanShootHook)
+            {
+                hook.shootHook();
+                cancelMovement = false;
+                CanShootHook = false;
+                StartCoroutine(HookCooldown());
+            }
+        
+        };
 
         //controls.GamePlay.HookPull.performed += temp => { hookPullActive=true; };
         //controls.GamePlay.HookPull.canceled += temp => { hookPullActive = false;  };
@@ -95,10 +114,16 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+
+    private IEnumerator HookCooldown()
+    {
+        if (CanShootHook) yield return null;
+        yield return new WaitForSecondsRealtime(hookCoolDownSeconds);
+        CanShootHook = true;
+    }
+
     private void GetUseInput()                           
     {
-        //Left Right Movement
-
         Vector2 MovForce = move * runSpeed * Time.deltaTime;
     }
     private void OnEnable()
@@ -576,7 +601,8 @@ public class PlayerMovement : MonoBehaviour
     private void PullToHook2()
     {
         //rigidBody.gravityScale = 0;
-        //rigidBody.velocity = Vector2.zero;
+        //rigidBody.velocity = Vector2.zero;]
+        if (!hook.hookAtTarget)return;
         Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
         direction.Normalize();
         direction *= hookForce;
