@@ -11,8 +11,15 @@ public class Hook2 : MonoBehaviour
     
     private void OnCollisionEnter2D(Collision2D collision)
     {
+
         if (alreadyConntected) return;
         hookPlayer.setHookAtTarget();
         alreadyConntected = true;
+        hookPlayer.VelocityToZero();
     }
+    public void ResetVar()
+    {
+        alreadyConntected = false;
+    }
+
 }

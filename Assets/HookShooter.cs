@@ -20,7 +20,7 @@ public class HookShooter : MonoBehaviour
     bool aimingActive = false;
 
     float airtime = 0;
-    float maxAirtime = 250000;
+    [SerializeField] float maxAirtime;
 
 
     private void Update()
@@ -28,7 +28,7 @@ public class HookShooter : MonoBehaviour
         if (aimingActive) StartCoroutine(keepDirection());
         if (aimingActive) updateDirection();
 
-        Debug.Log(direction);
+        
     }
     private void FixedUpdate()
     {
@@ -42,10 +42,18 @@ public class HookShooter : MonoBehaviour
     {
         if (direction == Vector2.zero && oldDirection == Vector2.zero) return;
         //hook.enabled = true;
-        rb.position = player.rigidBody.position;
+        rb.gravityScale = 0;
+        rb.velocity = Vector2.zero;
+        hookAtTarget = false;
+        Vector2 temp = player.rigidBody.position;
+        temp.y += 0.5f;
+        rb.position = temp;
+
+        //rb.position = player.rigidBody.position;
         aimingActive = false;
         hookActive = true;
         airtime = 0;
+        hook.ResetVar();
         if (direction == Vector2.zero && oldDirection != Vector2.zero) direction = oldDirection;
 
     }
@@ -62,13 +70,19 @@ public class HookShooter : MonoBehaviour
         if (airtime < maxAirtime)
         {
             airtime++;
-            rb.AddForce(direction);
+            //rb.AddForce(direction);
+            rb.velocity = direction;
+        }
+        else if(!hookAtTarget)
+        {
+            rb.gravityScale = 1;
         }
     }
     
     public void setHookAtTarget()
     {
         hookAtTarget = true;
+        rb.gravityScale = 0;
     }
 
     IEnumerator keepDirection()
@@ -78,7 +92,6 @@ public class HookShooter : MonoBehaviour
             yield return new WaitForSeconds(coyoteStickInputTime);
         }
         oldDirection = direction;
-        Debug.Log("One run through");
         yield return null;
     }
     public void ResetHook()
@@ -87,5 +100,8 @@ public class HookShooter : MonoBehaviour
         hook.enabled = false;
         hookActive = false;
     }
- 
+    public void VelocityToZero()
+    {
+        rb.velocity = Vector2.zero;
+    }
 }
