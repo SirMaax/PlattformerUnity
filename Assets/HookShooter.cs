@@ -33,6 +33,7 @@ public class HookShooter : MonoBehaviour
     private void FixedUpdate()
     {
         if (!hookAtTarget && hookActive) ApplyForceToHook();
+        DrawAimingLine();
     }
     public void aimingActiveToggle()
     {
@@ -103,5 +104,10 @@ public class HookShooter : MonoBehaviour
     public void VelocityToZero()
     {
         rb.velocity = Vector2.zero;
+    }
+
+    private void DrawAimingLine()
+    {
+        Debug.DrawLine(player.rigidBody.position, move * 59);
     }
 }

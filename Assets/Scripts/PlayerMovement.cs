@@ -62,17 +62,20 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float doubleJumpIncreasment;           //Regulates ´how high the player can jump with double Jums
     public bool fallingFromPlattform = false;
 
-    //Hook
-    public Transform hookTransform;
-    [SerializeField] float hookForce;
-    bool hookPullActive = false;
+  
+
 
     //New Movement
     PlayerControls controls;
     public Vector2 move;
-
+    
+    [Header("Hook")]
     [SerializeField] float hookCoolDownSeconds;
-    bool CanShootHook = true;
+    public bool CanShootHook = true;
+    public Transform hookTransform;
+    [SerializeField] float hookForce;
+    bool hookPullActive = false;
+
 
     private void Awake()
     {
