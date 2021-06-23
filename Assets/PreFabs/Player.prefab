@@ -108,6 +108,7 @@ GameObject:
   - component: {fileID: 3435499331756499888}
   - component: {fileID: 3435499331756499883}
   - component: {fileID: 3435499331756499884}
+  - component: {fileID: 3602667927621109142}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -150,35 +151,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 3435499331756499886}
   plAttack: {fileID: 3435499331756499885}
+  hook: {fileID: 3602667927621109142}
   rigidBody: {fileID: 3435499331756499887}
   animator: {fileID: 3435499331756499884}
-  runSpeed: 1.5
-  jumpHeight: 112
-  downMovementForce: 15
-  minimumJumpHeight: 0.4
-  dashForce: 5000
-  dashCooldown: 25
-  dashMultiply: 550
-  moveFromWallAway: 0
-  distanceWallJumpX: 400
-  wallJumpHeight: 100
-  pogoHeight: 1000
   grounded: 1
   airborn: 0
+  runSpeed: 2
+  maxDownSpeed: -40
+  downMovementForce: 50
+  maxDownSpeedWithPress: -50
+  move: {x: 0, y: 0}
+  dashForce: 3250
+  dashCooldown: 2
+  dashMultiply: 550
+  jumpHeight: 112
+  minimumJumpHeight: 0.4
+  pogoHeight: 1000
+  fallingFromPlattform: 0
   currentJumpDuration: 0
   jumpDuration: 8.5
-  maxDownSpeed: -20
+  distanceWallJumpX: 400
+  moveFromWallAway: 0
+  wallJumpHeight: 100
+  wallSlideSpeed: 0
   touchWallLeft: 0
   touchWallRight: 0
+  groundWallJump: 0
+  canConnectToWAll: 1
   wallJump: 0
   lastPositionOnWall: {x: 0, y: 0}
-  groundWallJump: 0
-  wallSlideSpeed: 0
-  canConnectToWAll: 1
-  doubleJumpedAlready: 0
   doubleJumpIncreasment: 1.3
-  fallingFromPlattform: 0
-  move: {x: 0, y: 0}
+  doubleJumpedAlready: 0
+  hookTransform: {fileID: 0}
+  hookCoolDownSeconds: 1
+  hookForce: 4000
+  CanShootHook: 1
+  dashDuration: 0.15
 --- !u!114 &3435499331756499886
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -255,6 +263,7 @@ MonoBehaviour:
   OnCrouchEvent:
     m_PersistentCalls:
       m_Calls: []
+  tempField: 5
 --- !u!114 &3435499331756499885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -433,6 +442,25 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &3602667927621109142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3435499331756499891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f33d8faa728ea846a3966d76613f685, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 3435499331756499882}
+  rb: {fileID: 0}
+  hook: {fileID: 0}
+  hookForce: 55
+  coyoteStickInputTime: 1
+  hookAtTarget: 0
+  maxAirtime: 25
 --- !u!1 &3435499332160555116
 GameObject:
   m_ObjectHideFlags: 0
