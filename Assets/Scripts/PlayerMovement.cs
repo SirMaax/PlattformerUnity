@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float maxDownSpeedWithPress;           //The force of how fast the player is pulled towards earth while pressing down
     private bool cancelMovement = false;                 //Used when aiming with hook that the player can not move while aiming
     private float lastHorizontMovement = 0f;                //Important for knowing which direction the next dash is gonna go, when not moving
+    private float initalGravity;                            //The normal gravity is saved here to later restore a changed gravity amount;
     public Vector2 move;
 
 
@@ -82,8 +83,10 @@ public class PlayerMovement : MonoBehaviour
     private bool downMovement = false;                      //True = Player is pressing down , False not
     //[SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
 
-
-
+    [Header("new DAsh")]
+    [SerializeField] float dashDuration;
+    private bool canDash = true;
+    private bool dashing = false;
     private void Awake()
     {
         controls = new PlayerControls();
@@ -91,7 +94,7 @@ public class PlayerMovement : MonoBehaviour
         controls.GamePlay.Move.performed += temp => move = temp.ReadValue<Vector2>();
         controls.GamePlay.Move.canceled += temp => move = Vector2.zero;
 
-        controls.GamePlay.Dodge.performed += temp => Dash();
+        controls.GamePlay.Dodge.performed += temp => Dash2();
 
         controls.GamePlay.Jump.performed += temp => PreJumpCheck();
         controls.GamePlay.Jump.canceled += temp => { StopYAcceleration(); currentJumpDuration = jumpDuration; };
@@ -145,6 +148,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         realJumpHeight = jumpHeight;
+        initalGravity = rigidBody.gravityScale;
     }
     
     private void PreJumpCheck()
@@ -212,37 +216,17 @@ public class PlayerMovement : MonoBehaviour
     /// //////////////////////////////////////////////
     /// </summary>
     /// 
-    private void FixedUpdate2()
-    {
-        if(airborn && !cancelMovement) controller.Move2(move.x, false, false, true);
-        else if (!cancelMovement) controller.Move2(move.x, false, false,false);
-        //if (!cancelMovement && move.x != 0) controller.Move(move.x);
-        //if (!cancelMovement) Move();
-
-    }
-    private void FixedUpdate3()
-    {
-        Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
-        //direction.Normalize();
-        //direction *= hookForce;
-        Debug.Log(direction);
-        //Debug.DrawLine(rigidBody.position, hookTransform.position);
-        //Movement
-        if (hookPullActive) PullToHook();
-        //if (!cancelMovement) controller.Move(move.x, false, false);
-        //Jump
-    }
     private void FixedUpdate()
     {
         //if (airborn && !cancelMovement) controller.Move2(move.x, false, false, hookPullActive);
          if (!cancelMovement) controller.Move2(move.x*runSpeed, false, false, hookPullActive);
-
+        if (cancelMovement && grounded) controller.Move2(0, false, false, false);
         wallTouchMethodExecuted = false;
         //Count down coyoteWallTime
 
         if (coyoteWallTime != 0) coyoteWallTime--;
 
-        //For pulling to the hook
+
         
 
         //Checks if the player is Airborn
@@ -250,12 +234,11 @@ public class PlayerMovement : MonoBehaviour
         //Clamp gravityDownFallSpeed
         ClampGravity();
         //Counts intervall between dashes
-        dashCounter++;
+        //dashCounter++;
         //Slide down Wall
         if (wallJump == 0 && (touchWallLeft || touchWallRight))
             rigidBody.velocity = new Vector2(0, wallSlideSpeed);
-        //Movement
-            //if(!cancelMovement)controller.Move(move.x, false, false);
+
         //Jump
         Jump();
         //DownMovement in air
@@ -294,7 +277,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
-    //DASH Movement regulates the dash
+    //DEAD DASh Method
     public void Dash()
     {
         //Active when PLayer pressed right button and is allowed to dash
@@ -310,7 +293,8 @@ public class PlayerMovement : MonoBehaviour
                 ResetDashVar();
 
                 //Apply force
-                rigidBody.AddForce(new Vector2(lastHorizontMovement * (dashForce - (System.Math.Abs(move.x) * dashMultiply)), 0));
+                //rigidBody.AddForce(new Vector2(lastHorizontMovement * (dashForce - (System.Math.Abs(move.x) * dashMultiply)), 0));
+                rigidBody.AddForce(new Vector2(lastHorizontMovement * dashForce, 0));
             }
         }
     }
@@ -369,7 +353,7 @@ public class PlayerMovement : MonoBehaviour
     //When Player presses down to move down in Air
     public void DownMovement()
     {
-        if (downMovement && airborn)
+        if (downMovement && airborn && !dashing)
         {
             rigidBody.AddForce(new Vector2(0, -downMovementForce));
             animator.SetBool("JumpingUp", false);
@@ -427,7 +411,6 @@ public class PlayerMovement : MonoBehaviour
             Vector2 temp = new Vector2(move.x * 10, maxDownSpeed);
             rigidBody.velocity = temp;
         }
-
     }
 
     //Is triggered when the wall is right from the player
@@ -601,16 +584,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void PullToHook()
-    {
-        //rigidBody.gravityScale = 0;
-        rigidBody.velocity = Vector2.zero;
-        Vector2 direction = (Vector2)hookTransform.position - rigidBody.position;
-        //direction.Normalize();
-        direction *= hookForce;
-        //rigidBody.AddForce(direction);
-        rigidBody.AddForceAtPosition((Vector2)hookTransform.position, rigidBody.position);
-    }
+
     private void PullToHook2()
     {
         //rigidBody.gravityScale = 0;
@@ -622,23 +596,38 @@ public class PlayerMovement : MonoBehaviour
         rigidBody.AddForce(direction);
         //rigidBody.AddForceAtPosition((Vector2)hookTransform.position, rigidBody.position);
     }
-    private void Move()
-    {
-        Vector2 temp = move;
-        temp.Normalize();
-        temp *= runSpeed;
-       //float tempy = rigidBody.velocity.y;
 
-        rigidBody.AddForce(new Vector2(temp.x, 0));
-        
+    private void Dash2()
+    {
+        if (canDash)
+        {
+            dashing = true;
+            canDash = false;
+            TogggleGravtiyToZero();
+            cancelMovement = true;
+            rigidBody.velocity = Vector2.zero;
+            StartCoroutine(ApplyDashForce());
+            StartCoroutine(DashCooldown2());
+        }
     }
-    private void Flip()
+    private IEnumerator ApplyDashForce()
     {
-        // Multiply the player's x local scale by -1.
-
-        Vector3 theScale = transform.localScale;
-        theScale.x *= -1;
-        transform.localScale = theScale;
+        rigidBody.AddForce(new Vector2(lastHorizontMovement * dashForce,0));
+        yield return new WaitForSeconds(dashDuration);
+        TogggleGravtiyToZero();
+        cancelMovement = false;
+        dashing = false;
+    }
+    private void TogggleGravtiyToZero()
+    {
+        if (rigidBody.gravityScale == 0) rigidBody.gravityScale = initalGravity;
+        else rigidBody.gravityScale = 0;
+    }
+    private IEnumerator DashCooldown2()
+    {
+        yield return new WaitForSeconds(dashCooldown);
+        canDash = true;
+        
     }
 }
 

@@ -528,8 +528,20 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3435499331756499882, guid: faed7f9ea4e913a4cbef155880152649, type: 3}
+      propertyPath: dashForce
+      value: 3250
+      objectReference: {fileID: 0}
+    - target: {fileID: 3435499331756499882, guid: faed7f9ea4e913a4cbef155880152649, type: 3}
       propertyPath: hookForce
       value: 4000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3435499331756499882, guid: faed7f9ea4e913a4cbef155880152649, type: 3}
+      propertyPath: dashCooldown
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3435499331756499882, guid: faed7f9ea4e913a4cbef155880152649, type: 3}
+      propertyPath: dashDuration
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 3435499331756499882, guid: faed7f9ea4e913a4cbef155880152649, type: 3}
       propertyPath: maxDownSpeed
