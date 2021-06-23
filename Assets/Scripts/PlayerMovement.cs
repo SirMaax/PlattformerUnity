@@ -77,7 +77,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float hookCoolDownSeconds;
     [SerializeField] float hookForce;
     public bool CanShootHook = true;
-    bool hookPullActive = false;
+    public bool hookPullActive = false;
 
     [Header("Unsure about")]
     private bool downMovement = false;                      //True = Player is pressing down , False not
@@ -119,8 +119,16 @@ public class PlayerMovement : MonoBehaviour
             }
         
         };
-        controls.GamePlay.HookPull.performed += temp => { PullToHook2(); hookPullActive = true; };
-        controls.GamePlay.HookPull.canceled += temp => { hook.ResetHook(); hookPullActive = false; };
+        controls.GamePlay.HookPull.performed += temp => {
+            if (hook.hookAtTarget)
+            {
+                PullToHook2();
+                hookPullActive = true;
+            }
+            };
+        controls.GamePlay.HookPull.canceled += temp => { 
+            if(hook.hookAtTarget)hook.ResetHook(); 
+        };
 
     }
 
@@ -207,6 +215,7 @@ public class PlayerMovement : MonoBehaviour
         {
             touchWallLeft = false;
             touchWallRight = false;
+            Debug.Log("set wrong");
             animator.SetBool("JumpingDown", true);
             animator.SetBool("Walled", false);
         }
@@ -219,9 +228,14 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         //if (airborn && !cancelMovement) controller.Move2(move.x, false, false, hookPullActive);
-         if (!cancelMovement) controller.Move2(move.x*runSpeed, false, false, hookPullActive);
-        if (cancelMovement && grounded) controller.Move2(0, false, false, false);
-        wallTouchMethodExecuted = false;
+        if(!touchWallLeft || !touchWallRight)
+        {
+            if (!cancelMovement) controller.Move2(move.x * runSpeed, false, false, hookPullActive);
+            if (cancelMovement && grounded) controller.Move2(0, false, false, hookPullActive);
+        }
+
+
+        //wallTouchMethodExecuted = false;
         //Count down coyoteWallTime
 
         if (coyoteWallTime != 0) coyoteWallTime--;
@@ -238,7 +252,7 @@ public class PlayerMovement : MonoBehaviour
         //Slide down Wall
         if (wallJump == 0 && (touchWallLeft || touchWallRight))
             rigidBody.velocity = new Vector2(0, wallSlideSpeed);
-
+        
         //Jump
         Jump();
         //DownMovement in air
@@ -246,7 +260,7 @@ public class PlayerMovement : MonoBehaviour
         //Stopp's jump in air
         JumpStopVelocity();
         //TouchingWall Action
-        //TouchingWall();
+
 
         //ANIMATION PART
 
@@ -528,6 +542,7 @@ public class PlayerMovement : MonoBehaviour
     //USED for when touching wall
     private void ResetWallVar()
     {
+        hookPullActive = false;
         currentJumpDuration = jumpDuration;
         minimumJump = minimumJumpHeight;
         wallJump = 0;
@@ -601,6 +616,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (canDash)
         {
+            hookPullActive = false;
             dashing = true;
             canDash = false;
             TogggleGravtiyToZero();
