@@ -6,75 +6,82 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("References")]
     public CharacterController2D controller;
     public PlayerAttack plAttack;
     public HookShooter hook;
     public Rigidbody2D rigidBody;
     public Animator animator;
+    PlayerControls controls;
 
-    [SerializeField] float runSpeed;                        //Controls RunSpeed for player
-    [SerializeField] float jumpHeight;                //Controls jumpforce
-    [SerializeField] float downMovementForce = 5;           //The force of how fast the player is pulled towards earth while pressing down
-    [SerializeField] float minimumJumpHeight = 0f;          //The minimum distance a player always jumps when pressing the jump button
-    //[SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
-    [SerializeField] float dashForce = 0f;                  //Intial force behind a dash
-    [SerializeField] float dashCooldown = 0f;               //How long the cooldown between dashes is
-    [SerializeField] float dashMultiply = 0.1f;             //How far the player dashes
-    [SerializeField] float moveFromWallAway = 0f;           //When sliding down the wall, player is set a few pixels away from the wall.    Maybe unnecessary ;D
-    [SerializeField] float distanceWallJumpX = 0f;          //Distance the player will jump away from the wall
-    [SerializeField] float wallJumpHeight = 0f;             //Height player jumps with a wallJump
-    [SerializeField] float pogoHeight = 0f;                 //When hitting something with sword in the air, how far the player is send high;
-
-
-    private float lastHorizontMovement = 0f;                //Important for knowing which direction the next dash is gonna go, when not moving
-
-    private bool cancelMovement = false;
-    private bool downMovement = false;                      //True = Player is pressing down , False not
-    private bool dashReady = true;                          //True -> PLayer can dash
-    private float dashCounter = 25f;                        //Counts intervalls between dashes
-    private bool dashOnlyOnceInAir = true;                  //Allows the player to only dash once in air
-
+    [Header("Important vars")]
     public bool grounded = true;                            //True when grounded in air false
     public bool airborn = false;                            //When jumping player is airborn
+
+    [Header("Movement")]
+    [SerializeField] float runSpeed;                        //Controls RunSpeed for player
+    [SerializeField] float maxDownSpeed;                    //How fast the player moves down in air when pressing odwn
+    [SerializeField] float downMovementForce;           //The force of how fast the player is pulled towards 
+    [SerializeField] float maxDownSpeedWithPress;           //The force of how fast the player is pulled towards earth while pressing down
+    private bool cancelMovement = false;                 //Used when aiming with hook that the player can not move while aiming
+    private float lastHorizontMovement = 0f;                //Important for knowing which direction the next dash is gonna go, when not moving
+    public Vector2 move;
+
+
+    [Header("Dash")]
+    [SerializeField] float dashForce;                 //Intial force behind a dash
+    [SerializeField] float dashCooldown;               //How long the cooldown between dashes is
+    [SerializeField] float dashMultiply;             //How far the player dashes
+    private bool dashReady = true;                          //True -> PLayer can dash
+    private bool dashOnlyOnceInAir = true;                  //Allows the player to only dash once in air
+    private float dashCounter = 25f;                        //Counts intervalls between dashes
+
+    [Header("JumpingMechanic")]
+    [SerializeField] float jumpHeight;                //Controls jumpheight
+    [SerializeField] float minimumJumpHeight;          //The minimum distance a player always jumps when pressing the jump button
+    [SerializeField] float pogoHeight;                 //When hitting something with sword in the air, how far the player is send high;
+    public bool fallingFromPlattform = false;
+    private bool DoOnlyOnce = false;                        //Used for jumpig       -> Should rename that :D
+    private float realJumpHeight;
     private float minimumJump = 0f;                         //Counter for minimumJump
     public float currentJumpDuration = 0f;                  //Length of current Jump
     public float jumpDuration = 5f;                         //The length of the maximum jump
-    [SerializeField] float maxDownSpeed;                    //How fast the player moves down in air when pressing odwn
-    private bool DoOnlyOnce = false;                        //Used for jumpig       -> Should rename that :D
-    private float realJumpHeight;
 
+
+    [Header("WallMecanicStuff")]
+    [SerializeField] float distanceWallJumpX;          //Distance the player will jump away from the wall
+    [SerializeField] float moveFromWallAway;           //When sliding down the wall, player is set a few pixels away from the wall.    Maybe unnecessary ;D
+    [SerializeField] float wallJumpHeight;             //Height player jumps with a wallJump
+    [SerializeField] float wallSlideSpeed;                  //How fast the player slides down the wall
+    private bool wallTouchMethodExecuted = false;
+    private bool slideDownWall = false;                     //If the player wants to slide down the wall
     public bool touchWallLeft = false;                      //IF player is touching wall from the left
     public bool touchWallRight = false;                     //IF player is touching wall from the right
-    public float wallJump = 0f;                             //0 = No touch , 1 = left Wall ,2 = right wall
-    public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
     public bool groundWallJump = false;                     //WHen standing next to a wall and jumping = true
-    [SerializeField] float wallSlideSpeed;                  //How fast the player slides down the wall
     public bool canConnectToWAll = true;                    //When false the player can not conect to a wall
-    private bool slideDownWall = false;                     //If the player wants to slide down the wall
-
-    private float lastYPos;
-    private bool wallTouchMethodExecuted = false;
+    private float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
+    public float wallJump = 0f;                             //0 = No touch , 1 = left Wall ,2 = right wall
     private float coyoteWallTime = 0f;                       //Counts down CooyteWallTime
     private float coyoteWallStartTime = 2f;                  //How long the player has time to press the button after leaving the wall and still beeing able to jump
-    private float lastWallTouched = 0f;                      //1 == left wall ,  2 == right wall
+    private float lastYPos;
+    public Vector2 lastPositionOnWall;                      //Holds the position where a wall was touched last
 
-    public bool doubleJumpedAlready = false;               //Used for switching jump Animation 
+
+    [Header("Double Jump")]
     [SerializeField] float doubleJumpIncreasment;           //Regulates ´how high the player can jump with double Jums
-    public bool fallingFromPlattform = false;
-
-  
-
-
-    //New Movement
-    PlayerControls controls;
-    public Vector2 move;
+    public bool doubleJumpedAlready = false;               //Used for switching jump Animation 
     
     [Header("Hook")]
-    [SerializeField] float hookCoolDownSeconds;
-    public bool CanShootHook = true;
     public Transform hookTransform;
+    [SerializeField] float hookCoolDownSeconds;
     [SerializeField] float hookForce;
+    public bool CanShootHook = true;
     bool hookPullActive = false;
+
+    [Header("Unsure about")]
+    private bool downMovement = false;                      //True = Player is pressing down , False not
+    //[SerializeField] float jumpHeightRecument = 0.1f;       //The longer a jump goes on the jumpHeight is reduced
+
 
 
     private void Awake()
@@ -109,14 +116,10 @@ public class PlayerMovement : MonoBehaviour
             }
         
         };
-
-        //controls.GamePlay.HookPull.performed += temp => { hookPullActive=true; };
-        //controls.GamePlay.HookPull.canceled += temp => { hookPullActive = false;  };
         controls.GamePlay.HookPull.performed += temp => { PullToHook2(); hookPullActive = true; };
         controls.GamePlay.HookPull.canceled += temp => { hook.ResetHook(); hookPullActive = false; };
 
     }
-
 
     private IEnumerator HookCooldown()
     {
@@ -127,7 +130,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void GetUseInput()                           
     {
-        Vector2 MovForce = move * runSpeed * Time.deltaTime;
+        if (move.y < 0) downMovement = true;
+        if (move.y >= 0) downMovement = false;
     }
     private void OnEnable()
     {
@@ -231,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         //if (airborn && !cancelMovement) controller.Move2(move.x, false, false, hookPullActive);
-         if (!cancelMovement) controller.Move2(move.x, false, false, hookPullActive);
+         if (!cancelMovement) controller.Move2(move.x*runSpeed, false, false, hookPullActive);
 
         wallTouchMethodExecuted = false;
         //Count down coyoteWallTime
@@ -413,11 +417,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void ClampGravity()
     {
-        if (rigidBody.velocity.y <= maxDownSpeed && !hookPullActive)
+        if (downMovement && rigidBody.velocity.y <= maxDownSpeedWithPress && !hookPullActive)
+        {
+            Vector2 temp = new Vector2(move.x * 10, maxDownSpeedWithPress);
+            rigidBody.velocity = temp;
+        }
+        else if (!downMovement && rigidBody.velocity.y <= maxDownSpeed && !hookPullActive)
         {
             Vector2 temp = new Vector2(move.x * 10, maxDownSpeed);
             rigidBody.velocity = temp;
         }
+
     }
 
     //Is triggered when the wall is right from the player
